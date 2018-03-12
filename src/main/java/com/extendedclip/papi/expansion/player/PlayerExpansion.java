@@ -32,6 +32,8 @@ import org.bukkit.entity.Player;
 
 public class PlayerExpansion extends PlaceholderExpansion {
 
+	private final String VERSION = getClass().getPackage().getImplementationVersion();
+	
 	@Override
 	public String getIdentifier() {
 		return "player";
@@ -49,7 +51,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 	
 	@Override
 	public String getVersion() {
-		return "1.4.4";
+		return VERSION;
 	}
 
 	
