@@ -148,6 +148,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
 			return String.valueOf(p.getHealthScale());
 		case "item_in_hand":
 			return p.getItemInHand() != null ? p.getItemInHand().getType().name() : "";
+		case "item_in_hand_data":
+			return p.getItemInHand() != null ? p.getItemInHand().getDurability()+"" : "0";
 		case "last_damage":
 			return String.valueOf(p.getLastDamage());
 		case "max_health":
