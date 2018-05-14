@@ -63,7 +63,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 		}
 		
 		if (identifier.startsWith("ping_")) {
-			identifier = identifier.split("has_permission_")[1];
+			identifier = identifier.split("ping_")[1];
 			Player t = Bukkit.getPlayer(identifier);
 			if (t != null) {
 				return getPing(t);
