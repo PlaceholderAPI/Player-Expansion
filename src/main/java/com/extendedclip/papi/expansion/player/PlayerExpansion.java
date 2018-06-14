@@ -105,7 +105,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 			if (perm.isEmpty()) {
 				return "";
 			}
-			return p == null ? "" : p.hasPermission(perm) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+			return p.hasPermission(perm) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
 		}
 		
 		switch (identifier) {
