@@ -28,19 +28,20 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class PlayerExpansion extends PlaceholderExpansion {
 
 	private final String VERSION = getClass().getPackage().getImplementationVersion();
-	
+
 	@Override
 	public String getIdentifier() {
 		return "player";
 	}
 
 	@Override
-	public String getPlugin() {
+	public String getRequiredPlugin() {
 		return null;
 	}
 
@@ -57,10 +58,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public String onPlaceholderRequest(Player p, String identifier) {
-		if (p == null) {
-			return "";
-		}
+	public String onRequest(OfflinePlayer player, String identifier) {
 		
 		if (identifier.startsWith("ping_")) {
 			identifier = identifier.split("ping_")[1];
@@ -70,13 +68,44 @@ public class PlayerExpansion extends PlaceholderExpansion {
 			}
 			return "0";
 		}
+
+    if (player == null) {
+      return "";
+    }
+
+    // offline placeholders
+    switch (identifier) {
+      case "name":
+        return player.getName();
+      case "uuid":
+        return player.getUniqueId().toString();
+      case "first_played":
+      case "first_join":
+        return String.valueOf(player.getFirstPlayed());
+      case "first_played_formatted":
+      case "first_join_date":
+        return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getFirstPlayed()));
+      case "last_played":
+      case "last_join":
+        return String.valueOf(player.getLastPlayed());
+      case "last_played_formatted":
+      case "last_join_date":
+        return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getLastPlayed()));
+    }
+
+    // online placeholders
+    if (!player.isOnline()) {
+		  return "";
+    }
+
+    Player p = (Player) player;
 		
 		if (identifier.startsWith("has_permission_")) {
 			String perm = identifier.split("has_permission_")[1];
 			if (perm.isEmpty()) {
 				return "";
 			}
-			return p.hasPermission(perm) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+			return p == null ? "" : p.hasPermission(perm) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
 		}
 		
 		switch (identifier) {
@@ -85,12 +114,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
 		case "server":
 		case "servername":
 			return Bukkit.getServerName();
-		case "name":
-			return p.getName();
 		case "displayname":
 			return p.getDisplayName();
-		case "uuid":
-			return p.getUniqueId().toString();
 		case "gamemode":
 			return p.getGameMode().name();
 		case "world":
@@ -133,9 +158,6 @@ public class PlayerExpansion extends PlaceholderExpansion {
 			return String.valueOf(p.getExpToLevel());
 		case "level":
 			return String.valueOf(p.getLevel());
-		case "first_join_date":
-			Date d = new Date(p.getFirstPlayed());
-			return PlaceholderAPIPlugin.getDateFormat().format(d);
 		case "fly_speed":
 			return String.valueOf(p.getFlySpeed());
 		case "food_level":
