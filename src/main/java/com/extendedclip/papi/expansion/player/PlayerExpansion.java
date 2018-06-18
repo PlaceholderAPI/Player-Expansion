@@ -39,11 +39,6 @@ public class PlayerExpansion extends PlaceholderExpansion {
   }
 
   @Override
-  public String getRequiredPlugin() {
-    return null;
-  }
-
-  @Override
   public String getAuthor() {
     return "clip";
   }
@@ -53,9 +48,6 @@ public class PlayerExpansion extends PlaceholderExpansion {
     return VERSION;
   }
 
-
-  @SuppressWarnings("deprecation")
-  @Override
   public String onRequest(OfflinePlayer player, String identifier) {
 
     if (identifier.startsWith("ping_")) {
@@ -77,6 +69,16 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return player.getName();
       case "uuid":
         return player.getUniqueId().toString();
+      case "has_played_before":
+        return bool(player.hasPlayedBefore());
+      case "online":
+        return bool(player.isOnline());
+      case "is_whitelisted":
+        return bool(player.isWhitelisted());
+      case "is_banned":
+        return bool(player.isBanned());
+      case "is_op":
+        return bool(player.isOp());
       case "first_played":
       case "first_join":
         return String.valueOf(player.getFirstPlayed());
@@ -89,6 +91,15 @@ public class PlayerExpansion extends PlaceholderExpansion {
       case "last_played_formatted":
       case "last_join_date":
         return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getLastPlayed()));
+      case "bed_x":
+        return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getX() + "" : "";
+      case "bed_y":
+        return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getY() + "" : "";
+      case "bed_z":
+        return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getZ() + "" : "";
+      case "bed_world":
+        return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
+            .getName() : "";
     }
 
     // online placeholders
@@ -100,17 +111,12 @@ public class PlayerExpansion extends PlaceholderExpansion {
 
     if (identifier.startsWith("has_permission_")) {
       String perm = identifier.split("has_permission_")[1];
-      if (perm.isEmpty()) {
-        return "";
-      }
-      return p.hasPermission(perm) ? PlaceholderAPIPlugin.booleanTrue()
-          : PlaceholderAPIPlugin.booleanFalse();
+      return bool(p.hasPermission(perm));
     }
 
     switch (identifier) {
       case "has_empty_slot":
-        return p.getInventory().firstEmpty() > -1 ? PlaceholderAPIPlugin.booleanFalse()
-            : PlaceholderAPIPlugin.booleanTrue();
+        return bool(p.getInventory().firstEmpty() > -1);
       case "server":
       case "servername":
         return Bukkit.getServerName();
@@ -126,27 +132,12 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return String.valueOf(p.getLocation().getBlockY());
       case "z":
         return String.valueOf(p.getLocation().getBlockZ());
-      case "is_op":
-        return p.isOp() ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-      case "bed_x":
-        return p.getBedSpawnLocation() != null ? String.valueOf(p.getBedSpawnLocation().getBlockX())
-            : "";
-      case "bed_y":
-        return p.getBedSpawnLocation() != null ? String.valueOf(p.getBedSpawnLocation().getBlockY())
-            : "";
-      case "bed_z":
-        return p.getBedSpawnLocation() != null ? String.valueOf(p.getBedSpawnLocation().getBlockZ())
-            : "";
-      case "bed_world":
-        return p.getBedSpawnLocation() != null ? p.getBedSpawnLocation().getWorld().getName() : "";
       case "ip":
         return p.getAddress().getAddress().getHostAddress();
       case "allow_flight":
-        return p.getAllowFlight() ? PlaceholderAPIPlugin.booleanTrue()
-            : PlaceholderAPIPlugin.booleanFalse();
+        return bool(p.getAllowFlight());
       case "can_pickup_items":
-        return p.getCanPickupItems() ? PlaceholderAPIPlugin.booleanTrue()
-            : PlaceholderAPIPlugin.booleanFalse();
+        return bool(p.getCanPickupItems());
       case "compass_x":
         return p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockX()) : "";
       case "compass_y":
@@ -211,13 +202,19 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return String.valueOf(p.getTotalExperience());
       case "walk_speed":
         return String.valueOf(p.getWalkSpeed());
+      case "world_time":
+        return String.valueOf(p.getWorld().getTime());
       case "world_time_12":
         return PlayerUtil.format12(p.getWorld().getTime());
-      case "world_time":
       case "world_time_24":
         return PlayerUtil.format24(p.getWorld().getTime());
     }
-    return p.getName();
+    // return null for unknown placeholders
+    return null;
+  }
+
+  public String bool(boolean b) {
+    return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
   }
 
   public String getPing(Player p) {
