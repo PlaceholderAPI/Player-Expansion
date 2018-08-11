@@ -168,6 +168,10 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return p.getItemInHand() != null ? p.getItemInHand().getType().name() : "";
       case "item_in_hand_data":
         return p.getItemInHand() != null ? p.getItemInHand().getDurability() + "" : "0";
+      case "item_in_offhand":
+        return p.getItemInHand() != null ? player.getInventory().getItemInOffHand().getType().name() : "";
+      case "item_in_offhand_data":
+        return p.getItemInHand() != null ? player.getInventory().getItemInOffHand().getType().getMaxDurability() + "" : "0";
       case "last_damage":
         return String.valueOf(p.getLastDamage());
       case "max_health":
@@ -180,6 +184,22 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return String.valueOf(p.getMaximumNoDamageTicks());
       case "no_damage_ticks":
         return String.valueOf(p.getNoDamageTicks());
+      case "armor_helmet_name":
+        return player.getInventory().getHelmet().getItemMeta().getDisplayName();
+      case "armor_helmet_data":
+        return String.valueOf(player.getInventory().getHelmet().getDurability());
+      case "armor_chestplate_name":
+        return player.getInventory().getChestplate().getItemMeta().getDisplayName();
+      case "armor_chestplate_data":
+        return String.valueOf(player.getInventory().getChestplate().getDurability());
+      case "armor_leggings_name":
+        return player.getInventory().getLeggings().getItemMeta().getDisplayName();
+      case "armor_leggings_data":
+        return String.valueOf(player.getInventory().getLeggings().getDurability());
+      case "armor_boots_name":
+        return player.getInventory().getBoots().getItemMeta().getDisplayName();
+      case "armor_boots_data":
+        return String.valueOf(player.getInventory().getBoots().getDurability());
       case "ping":
         return getPing(p);
       case "time":
