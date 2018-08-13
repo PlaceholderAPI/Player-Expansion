@@ -169,9 +169,9 @@ public class PlayerExpansion extends PlaceholderExpansion {
       case "item_in_hand_data":
         return p.getItemInHand() != null ? p.getItemInHand().getDurability() + "" : "0";
       case "item_in_offhand":
-        return p.getItemInHand() != null ? player.getInventory().getItemInOffHand().getType().name() : "";
+        return p.getInventory().getItemInOffHand() != null ? player.getInventory().getItemInOffHand().getType().name() : "";
       case "item_in_offhand_data":
-        return p.getItemInHand() != null ? player.getInventory().getItemInOffHand().getType().getMaxDurability() + "" : "0";
+        return p.getInventory().getItemInOffHand() != null ? player.getInventory().getItemInOffHand().getType().getMaxDurability() + "" : "0";
       case "last_damage":
         return String.valueOf(p.getLastDamage());
       case "max_health":
