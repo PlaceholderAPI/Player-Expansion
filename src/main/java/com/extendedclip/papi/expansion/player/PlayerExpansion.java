@@ -21,6 +21,7 @@
 
 package com.extendedclip.papi.expansion.player;
 
+import java.util.Optional;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
@@ -193,19 +194,19 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "no_damage_ticks":
                 return String.valueOf(p.getNoDamageTicks());
             case "armor_helmet_name":
-                return p.getInventory().getHelmet() != null ? p.getInventory().getHelmet().getItemMeta().getDisplayName() : "";
+                return Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_helmet_data":
                 return p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
             case "armor_chestplate_name":
-                return p.getInventory().getChestplate() != null ? p.getInventory().getChestplate().getItemMeta().getDisplayName() : "";
+              return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_chestplate_data":
                 return p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
             case "armor_leggings_name":
-                return p.getInventory().getLeggings() != null ? p.getInventory().getLeggings().getItemMeta().getDisplayName() : "";
+              return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_leggings_data":
                 return p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
             case "armor_boots_name":
-                return p.getInventory().getBoots() != null ? p.getInventory().getBoots().getItemMeta().getDisplayName() : "";
+              return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
