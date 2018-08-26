@@ -119,7 +119,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("item_in_hand_level_")){
-            String enchantment = identifier.split("item_in_hand_level")[1];
+            String enchantment = identifier.split("item_in_hand_level_")[1];
             return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
         }
 
