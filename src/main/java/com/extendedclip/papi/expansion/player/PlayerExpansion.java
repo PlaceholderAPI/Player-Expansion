@@ -131,6 +131,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return Bukkit.getServerName();
             case "displayname":
                 return p.getDisplayName();
+            case "locale":
+                return p.getLocale();
             case "gamemode":
                 return p.getGameMode().name();
             case "world":
