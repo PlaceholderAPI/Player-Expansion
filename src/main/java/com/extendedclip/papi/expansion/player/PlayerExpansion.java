@@ -135,6 +135,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return p.getLocale();
             case "gamemode":
                 return p.getGameMode().name();
+            case "direction":
+                return PlayerUtil.getCardinalDirection(p);
             case "world":
                 return p.getWorld().getName();
             case "x":
