@@ -178,7 +178,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getItemMeta().getDisplayName() : "";
+                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getType() : "";
             case "item_in_hand_data":
                 return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
             case "item_in_offhand":
