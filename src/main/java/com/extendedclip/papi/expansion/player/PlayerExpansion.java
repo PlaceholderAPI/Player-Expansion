@@ -25,6 +25,7 @@ import java.util.Optional;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -103,7 +104,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getZ() + "" : "";
             case "bed_world":
                 return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
-                                                                    .getName() : "";
+                        .getName() : "";
         }
 
         // online placeholders
@@ -120,7 +121,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("item_in_hand_level_")){
             String enchantment = identifier.split("item_in_hand_level_")[1];
-            return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            return String.valueOf(p.getInventory().getItemInHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
         }
 
         switch (identifier) {
@@ -178,13 +179,17 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getType() : "";
+                return p.getInventory().getItemInHand().getType() + "";
+            case "item_in_hand_name":
+                return p.getInventory().getItemInHand().getType() != Material.AIR && p.getInventory().getItemInHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInHand().getItemMeta().getDisplayName() : "";
             case "item_in_hand_data":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
+                return p.getInventory().getItemInHand().getType() != Material.AIR ? p.getInventory().getItemInHand().getDurability() + "" : "0";
             case "item_in_offhand":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
+                return p.getInventory().getItemInOffHand().getType() + "";
+            case "item_in_offhand_name":
+                return p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
             case "item_in_offhand_data":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
+                return p.getInventory().getItemInOffHand().getType() != Material.AIR ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
@@ -202,15 +207,15 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "armor_helmet_data":
                 return p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
             case "armor_chestplate_name":
-              return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_chestplate_data":
                 return p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
             case "armor_leggings_name":
-              return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_leggings_data":
                 return p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
             case "armor_boots_name":
-              return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
