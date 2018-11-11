@@ -117,10 +117,15 @@ public class PlayerExpansion extends PlaceholderExpansion {
             String perm = identifier.split("has_permission_")[1];
             return bool(p.hasPermission(perm));
         }
-
+        
+        @SuppressWarnings("deprecation")
         if (identifier.startsWith("item_in_hand_level_")){
             String enchantment = identifier.split("item_in_hand_level_")[1];
-            return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                return String.valueOf(p.getInventory().getItemInHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            } else {
+                return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            }
         }
 
         switch (identifier) {
@@ -178,13 +183,29 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getItemMeta().getDisplayName() : "";
+                if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    return p.getInventory().getItemInHand() != null ? p.getInventory().getItemInMainHand().getItemMeta().getDisplayName() : "";
+                } else {
+                    return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getItemMeta().getDisplayName() : "";
+                }
             case "item_in_hand_data":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
+                if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    return p.getInventory().getItemInHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
+                } else {
+                    return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
+                }
             case "item_in_offhand":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
+                if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    return "";
+                } else {
+                    return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
+                }
             case "item_in_offhand_data":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
+                if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    return "0";
+                } else {
+                    return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
+                }
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
