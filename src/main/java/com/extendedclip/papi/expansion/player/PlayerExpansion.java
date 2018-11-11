@@ -197,12 +197,14 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 }
             case "item_in_offhand":
                 if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    //@Return "" because the off hand doesn't exists in 1.7 and 1.8!
                     return "";
                 } else {
                     return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
                 }
             case "item_in_offhand_data":
                 if (Bukkit.getBukkitVersion().contains("1.7") || Bukkit.getBukkitVersion().contains("1.8")) {
+                    //@Return 0 because the off hand doesn't exists in 1.7 and 1.8!
                     return "0";
                 } else {
                     return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
