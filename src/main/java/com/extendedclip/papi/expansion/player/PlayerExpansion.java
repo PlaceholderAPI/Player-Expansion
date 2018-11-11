@@ -127,7 +127,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
             }
         }
-
+        
+        @SuppressWarnings("deprecation")
         switch (identifier) {
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > - 1);
