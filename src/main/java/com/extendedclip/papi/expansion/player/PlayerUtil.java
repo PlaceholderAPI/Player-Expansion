@@ -1,7 +1,10 @@
 package com.extendedclip.papi.expansion.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -35,6 +38,18 @@ public class PlayerUtil {
   public static final double ticksPerSecond = 1000d / 60d / 60d;
   private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
   private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
+
+  public static String getPing(Player p) {
+    try {
+      Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
+      Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
+      Field pingField = nmsplayer.getClass().getDeclaredField("ping");
+      return String.valueOf(pingField.getInt(nmsplayer));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return "0";
+  }
 
   public static String format12(long ticks) {
     try {
@@ -93,4 +108,13 @@ public class PlayerUtil {
     }
     return null;
   }
+
+  public static ItemStack itemInHand(Player p) {
+    try {
+      return p.getInventory().getItemInMainHand();
+    } catch (NoSuchMethodError e) {
+      return p.getInventory().getItemInHand();
+    }
+  }
+
 }

@@ -30,8 +30,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 
 public class PlayerExpansion extends PlaceholderExpansion {
@@ -59,7 +57,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
             identifier = identifier.split("ping_")[1];
             Player t = Bukkit.getPlayer(identifier);
             if (t != null) {
-                return getPing(t);
+                return PlayerUtil.getPing(t);
             }
             return "0";
         }
@@ -97,11 +95,11 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "last_join_date":
                 return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getLastPlayed()));
             case "bed_x":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getX() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getX()) : "";
             case "bed_y":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getY() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getY()) : "";
             case "bed_z":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getZ() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getZ()) : "";
             case "bed_world":
                 return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
                         .getName() : "";
@@ -121,7 +119,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
 
         if (identifier.startsWith("item_in_hand_level_")){
             String enchantment = identifier.split("item_in_hand_level_")[1];
-            return String.valueOf(p.getInventory().getItemInHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            return String.valueOf(PlayerUtil.itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
         }
 
         switch (identifier) {
@@ -179,17 +177,17 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return p.getInventory().getItemInHand().getType() + "";
+                return String.valueOf(PlayerUtil.itemInHand(p).getType());
             case "item_in_hand_name":
-                return p.getInventory().getItemInHand().getType() != Material.AIR && p.getInventory().getItemInHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInHand().getItemMeta().getDisplayName() : "";
+                return PlayerUtil.itemInHand(p).getType() != Material.AIR && PlayerUtil.itemInHand(p).getItemMeta().hasDisplayName() ? PlayerUtil.itemInHand(p).getItemMeta().getDisplayName() : "";
             case "item_in_hand_data":
-                return p.getInventory().getItemInHand().getType() != Material.AIR ? p.getInventory().getItemInHand().getDurability() + "" : "0";
+                return PlayerUtil.itemInHand(p).getType() != Material.AIR ? String.valueOf(PlayerUtil.itemInHand(p).getDurability()) : "0";
             case "item_in_offhand":
-                return p.getInventory().getItemInOffHand().getType() + "";
+                return String.valueOf(p.getInventory().getItemInOffHand().getType());
             case "item_in_offhand_name":
                 return p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
             case "item_in_offhand_data":
-                return p.getInventory().getItemInOffHand().getType() != Material.AIR ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
+                return p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
@@ -219,7 +217,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
-                return getPing(p);
+                return PlayerUtil.getPing(p);
             case "time":
                 return String.valueOf(p.getPlayerTime());
             case "time_offset":
@@ -253,18 +251,6 @@ public class PlayerExpansion extends PlaceholderExpansion {
 
     public String bool(boolean b) {
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-    }
-
-    public String getPing(Player p) {
-        try {
-            Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
-            Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
-            Field pingField = nmsplayer.getClass().getDeclaredField("ping");
-            return String.valueOf(pingField.getInt(nmsplayer));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "0";
     }
 
 }
