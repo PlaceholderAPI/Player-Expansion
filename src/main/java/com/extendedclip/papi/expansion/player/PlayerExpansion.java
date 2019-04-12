@@ -21,10 +21,14 @@
 
 package com.extendedclip.papi.expansion.player;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
@@ -32,9 +36,11 @@ import org.bukkit.entity.Player;
 
 import java.util.Date;
 
-public class PlayerExpansion extends PlaceholderExpansion {
+public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
+
+    private String low, medium, high;
 
     @Override
     public String getIdentifier() {
@@ -51,7 +57,19 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return VERSION;
     }
 
+    @Override
+    public Map<String, Object> getDefaults() {
+        Map<String, Object> defaults = new HashMap<>();
+        defaults.put("ping_color.high", "&a");
+        defaults.put("ping_color.medium", "&e");
+        defaults.put("ping_color.low", "&c");
+        return defaults;
+    }
+
     public String onRequest(OfflinePlayer player, String identifier) {
+        high = this.getString("ping_color.high", "&a");
+        medium = this.getString("ping_color.medium", "&e");
+        low = this.getString("ping_color.low", "&c");
 
         if (identifier.startsWith("ping_")) {
             identifier = identifier.split("ping_")[1];
@@ -60,6 +78,14 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return PlayerUtil.getPing(t);
             }
             return "0";
+        }
+        if (identifier.startsWith("colored_ping_")) {
+            identifier = identifier.split("colored_ping_")[1];
+            Player t = Bukkit.getPlayer(identifier);
+            if (t != null) {
+                int p = Integer.valueOf(PlayerUtil.getPing(t));
+                return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + PlayerUtil.getPing(t);
+            }
         }
 
         if (player == null) {
@@ -218,6 +244,9 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
                 return PlayerUtil.getPing(p);
+            case "colored_ping":
+                int ping = Integer.valueOf(PlayerUtil.getPing(p));
+                return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + PlayerUtil.getPing(p);
             case "time":
                 return String.valueOf(p.getPlayerTime());
             case "time_offset":
