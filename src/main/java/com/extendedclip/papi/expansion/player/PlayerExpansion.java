@@ -170,6 +170,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getLocation().getBlockY());
             case "z":
                 return String.valueOf(p.getLocation().getBlockZ());
+            case "biome":
+                return String.valueOf(p.getLocation().getBlock().getBiome());
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
