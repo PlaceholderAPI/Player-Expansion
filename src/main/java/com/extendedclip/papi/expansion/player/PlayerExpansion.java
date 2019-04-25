@@ -147,6 +147,10 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             String enchantment = identifier.split("item_in_hand_level_")[1];
             return String.valueOf(PlayerUtil.itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
         }
+        if (identifier.startsWith("item_in_offhand_level_")){
+            String enchantment = identifier.split("item_in_offhand_level_")[1];
+            return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+        }
 
         switch (identifier) {
             case "has_empty_slot":
