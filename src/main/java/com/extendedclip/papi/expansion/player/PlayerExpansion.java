@@ -36,6 +36,8 @@ import org.bukkit.entity.Player;
 
 import java.util.Date;
 
+import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
+
 public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
@@ -75,7 +77,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             identifier = identifier.split("ping_")[1];
             Player t = Bukkit.getPlayer(identifier);
             if (t != null) {
-                return PlayerUtil.getPing(t);
+                return getPing(t);
             }
             return "0";
         }
@@ -83,8 +85,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             identifier = identifier.split("colored_ping_")[1];
             Player t = Bukkit.getPlayer(identifier);
             if (t != null) {
-                int p = Integer.valueOf(PlayerUtil.getPing(t));
-                return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + PlayerUtil.getPing(t);
+                int p = Integer.valueOf(getPing(t));
+                return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
             }
         }
 
@@ -145,7 +147,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
 
         if (identifier.startsWith("item_in_hand_level_")){
             String enchantment = identifier.split("item_in_hand_level_")[1];
-            return String.valueOf(PlayerUtil.itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
         }
         if (identifier.startsWith("item_in_offhand_level_")){
             String enchantment = identifier.split("item_in_offhand_level_")[1];
@@ -165,7 +167,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "gamemode":
                 return p.getGameMode().name();
             case "direction":
-                return PlayerUtil.getCardinalDirection(p);
+                return getCardinalDirection(p);
             case "world":
                 return p.getWorld().getName();
             case "x":
@@ -209,11 +211,11 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return String.valueOf(PlayerUtil.itemInHand(p).getType());
+                return String.valueOf(itemInHand(p).getType());
             case "item_in_hand_name":
-                return PlayerUtil.itemInHand(p).getType() != Material.AIR && PlayerUtil.itemInHand(p).getItemMeta().hasDisplayName() ? PlayerUtil.itemInHand(p).getItemMeta().getDisplayName() : "";
+                return itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
             case "item_in_hand_data":
-                return PlayerUtil.itemInHand(p).getType() != Material.AIR ? String.valueOf(PlayerUtil.itemInHand(p).getDurability()) : "0";
+                return itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
             case "item_in_offhand":
                 return String.valueOf(p.getInventory().getItemInOffHand().getType());
             case "item_in_offhand_name":
@@ -249,10 +251,10 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
-                return PlayerUtil.getPing(p);
+                return getPing(p);
             case "colored_ping":
-                int ping = Integer.valueOf(PlayerUtil.getPing(p));
-                return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + PlayerUtil.getPing(p);
+                int ping = Integer.valueOf(getPing(p));
+                return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + getPing(p);
             case "time":
                 return String.valueOf(p.getPlayerTime());
             case "time_offset":
@@ -276,9 +278,9 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "world_time":
                 return String.valueOf(p.getWorld().getTime());
             case "world_time_12":
-                return PlayerUtil.format12(p.getWorld().getTime());
+                return format12(p.getWorld().getTime());
             case "world_time_24":
-                return PlayerUtil.format24(p.getWorld().getTime());
+                return format24(p.getWorld().getTime());
         }
         // return null for unknown placeholders
         return null;

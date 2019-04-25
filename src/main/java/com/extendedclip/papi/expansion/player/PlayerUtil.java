@@ -75,7 +75,7 @@ public class PlayerUtil {
   }
 
   public static String getCardinalDirection(Player player) {
-    double rotation = (player.getLocation().getYaw() - 90.0F) % 360.0F;
+    double rotation = player.getLocation().getYaw() + 180.0F;
     if (rotation < 0.0D) {
       rotation += 360.0D;
     }
