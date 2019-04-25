@@ -74,20 +74,25 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
         low = this.getString("ping_color.low", "&c");
 
         if (identifier.startsWith("ping_")) {
-            identifier = identifier.split("ping_")[1];
-            Player t = Bukkit.getPlayer(identifier);
-            if (t != null) {
-                return getPing(t);
+            if (identifier.split("ping_").length > 1) {
+                identifier = identifier.split("ping_")[1];
+                Player t = Bukkit.getPlayer(identifier);
+                if (t != null) {
+                    return getPing(t);
+                }
             }
             return "0";
         }
         if (identifier.startsWith("colored_ping_")) {
-            identifier = identifier.split("colored_ping_")[1];
-            Player t = Bukkit.getPlayer(identifier);
-            if (t != null) {
-                int p = Integer.valueOf(getPing(t));
-                return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
+            if (identifier.split("colored_ping_").length > 1) {
+                identifier = identifier.split("colored_ping_")[1];
+                Player t = Bukkit.getPlayer(identifier);
+                if (t != null) {
+                    int p = Integer.valueOf(getPing(t));
+                    return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
+                }
             }
+            return "0";
         }
 
         if (player == null) {
@@ -141,17 +146,26 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
         Player p = player.getPlayer();
 
         if (identifier.startsWith("has_permission_")) {
-            String perm = identifier.split("has_permission_")[1];
-            return bool(p.hasPermission(perm));
+            if (identifier.split("has_permission_").length > 1) {
+                String perm = identifier.split("has_permission_")[1];
+                return bool(p.hasPermission(perm));
+            }
+            return bool(false);
         }
 
         if (identifier.startsWith("item_in_hand_level_")){
-            String enchantment = identifier.split("item_in_hand_level_")[1];
-            return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            if (identifier.split("item_in_hand_level_").length > 1){
+                String enchantment = identifier.split("item_in_hand_level_")[1];
+                return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            }
+            return "0";
         }
         if (identifier.startsWith("item_in_offhand_level_")){
-            String enchantment = identifier.split("item_in_offhand_level_")[1];
-            return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            if (identifier.split("item_in_offhand_level_").length > 1) {
+                String enchantment = identifier.split("item_in_offhand_level_")[1];
+                return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            }
+            return "0";
         }
 
         switch (identifier) {
