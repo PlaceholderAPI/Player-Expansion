@@ -41,7 +41,9 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
 public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
-
+    
+    private final int serverVersion = Integer.parseInt(Bukkit.getServer().getClass().getPackage().getName().substring(23).split("_")[1]);
+    
     private String low, medium, high;
 
     @Override
@@ -173,6 +175,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return bool(p.getInventory().firstEmpty() > - 1);
             case "server":
             case "servername":
+            	if(serverVersion >= 14) return "";
+            	
                 return Bukkit.getServerName();
             case "displayname":
                 return p.getDisplayName();
