@@ -128,7 +128,7 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return bool(p.getInventory().firstEmpty() > - 1);
             case "server":
             case "servername":
-                return Bukkit.getServerName();
+                return "now availablee in the server expansion";
             case "displayname":
                 return p.getDisplayName();
             case "gamemode":
