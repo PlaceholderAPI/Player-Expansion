@@ -175,7 +175,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return bool(p.getInventory().firstEmpty() > - 1);
             case "server":
             case "servername":
-            	if(serverVersion >= 14) return "";
+            	if(serverVersion >= 14) return Bukkit.getServer().getName();
             	
                 return Bukkit.getServerName();
             case "displayname":
