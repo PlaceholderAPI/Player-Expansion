@@ -1,5 +1,10 @@
 package com.extendedclip.papi.expansion.player;
 
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -34,6 +39,18 @@ public class PlayerUtil {
   private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
   private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
 
+  public static String getPing(Player p) {
+    try {
+      Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
+      Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
+      Field pingField = nmsplayer.getClass().getDeclaredField("ping");
+      return String.valueOf(pingField.getInt(nmsplayer));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return "0";
+  }
+
   public static String format12(long ticks) {
     try {
       return twelve.format(twentyFour.parse(ticksToTime(ticks)));
@@ -56,4 +73,48 @@ public class PlayerUtil {
     }
     return (hours < 10 ? "0" + hours : hours) + ":" + (mins < 10 ? "0" + mins : mins);
   }
+
+  public static String getCardinalDirection(Player player) {
+    double rotation = player.getLocation().getYaw() - 180.0F;
+    if (rotation < 0.0D) {
+      rotation += 360.0D;
+    }
+    if ((0.0D <= rotation) && (rotation < 22.5D)) {
+      return "N";
+    }
+    if ((22.5D <= rotation) && (rotation < 67.5D)) {
+      return "NE";
+    }
+    if ((67.5D <= rotation) && (rotation < 112.5D)) {
+      return "E";
+    }
+    if ((112.5D <= rotation) && (rotation < 157.5D)) {
+      return "SE";
+    }
+    if ((157.5D <= rotation) && (rotation < 202.5D)) {
+      return "S";
+    }
+    if ((202.5D <= rotation) && (rotation < 247.5D)) {
+      return "SW";
+    }
+    if ((247.5D <= rotation) && (rotation < 292.5D)) {
+      return "W";
+    }
+    if ((292.5D <= rotation) && (rotation < 337.5D)) {
+      return "NW";
+    }
+    if ((337.5D <= rotation) && (rotation < 360.0D)) {
+      return "N";
+    }
+    return null;
+  }
+
+  public static ItemStack itemInHand(Player p) {
+    try {
+      return p.getInventory().getItemInMainHand();
+    } catch (NoSuchMethodError e) {
+      return p.getInventory().getItemInHand();
+    }
+  }
+
 }
