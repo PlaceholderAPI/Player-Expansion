@@ -94,19 +94,19 @@ public class PlayerUtil {
     if ((157.5D <= rotation) && (rotation < 202.5D)) {
       return "S";
     }
-    if ((202.5D <= rotation) && (rotation < 247.5D)) {
+    if ((202.5D <= rotation) && (rotation < 247.5D) || (rotation <= -119.33) && (rotation > -179)) {
       return "SW";
     }
-    if ((247.5D <= rotation) && (rotation < 292.5D)) {
+    if ((247.5D <= rotation) && (rotation < 292.5D) || (rotation <= -59.66) && (rotation > -119.33)) {
       return "W";
     }
-    if ((292.5D <= rotation) && (rotation < 337.5D)) {
+    if ((292.5D <= rotation) && (rotation < 337.5D) || (rotation <= -0.0) && (rotation > -59.66)) {
       return "NW";
     }
     if ((337.5D <= rotation) && (rotation < 360.0D)) {
       return "N";
     }
-    return null;
+    return "";
   }
 
   public static ItemStack itemInHand(Player p) {
