@@ -171,6 +171,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
         switch (identifier) {
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > - 1);
+            case "empty_slots":
+                return String.valueOf(getEmptySlots(p));
             case "server":
             case "servername":
                 return "now available in the server expansion";

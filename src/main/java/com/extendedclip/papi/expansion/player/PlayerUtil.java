@@ -1,7 +1,10 @@
 package com.extendedclip.papi.expansion.player;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -117,4 +120,20 @@ public class PlayerUtil {
     }
   }
 
+    public static int getEmptySlots(Player p) {
+        int slots = 0;
+        PlayerInventory inv = p.getInventory();
+        for (ItemStack is : inv.getContents()) {
+            if (is == null) slots++;
+        }
+
+        if (!Bukkit.getBukkitVersion().contains("1.7") && !Bukkit.getBukkitVersion().contains("1.8")) {
+          if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
+          if (inv.getHelmet() == null) slots--;
+          if (inv.getChestplate() == null) slots--;
+          if (inv.getLeggings() == null) slots--;
+          if (inv.getBoots() == null) slots--;
+        }
+        return slots;
+    }
 }
