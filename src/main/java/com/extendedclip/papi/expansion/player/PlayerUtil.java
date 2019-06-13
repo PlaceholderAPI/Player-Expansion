@@ -1,7 +1,10 @@
 package com.extendedclip.papi.expansion.player;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -94,19 +97,19 @@ public class PlayerUtil {
     if ((157.5D <= rotation) && (rotation < 202.5D)) {
       return "S";
     }
-    if ((202.5D <= rotation) && (rotation < 247.5D)) {
+    if ((202.5D <= rotation) && (rotation < 247.5D) || (rotation <= -119.33) && (rotation > -179)) {
       return "SW";
     }
-    if ((247.5D <= rotation) && (rotation < 292.5D)) {
+    if ((247.5D <= rotation) && (rotation < 292.5D) || (rotation <= -59.66) && (rotation > -119.33)) {
       return "W";
     }
-    if ((292.5D <= rotation) && (rotation < 337.5D)) {
+    if ((292.5D <= rotation) && (rotation < 337.5D) || (rotation <= -0.0) && (rotation > -59.66)) {
       return "NW";
     }
     if ((337.5D <= rotation) && (rotation < 360.0D)) {
       return "N";
     }
-    return null;
+    return "";
   }
 
   public static ItemStack itemInHand(Player p) {
@@ -117,4 +120,20 @@ public class PlayerUtil {
     }
   }
 
+    public static int getEmptySlots(Player p) {
+        int slots = 0;
+        PlayerInventory inv = p.getInventory();
+        for (ItemStack is : inv.getContents()) {
+            if (is == null) slots++;
+        }
+
+        if (!Bukkit.getBukkitVersion().contains("1.7") && !Bukkit.getBukkitVersion().contains("1.8")) {
+          if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
+          if (inv.getHelmet() == null) slots--;
+          if (inv.getChestplate() == null) slots--;
+          if (inv.getLeggings() == null) slots--;
+          if (inv.getBoots() == null) slots--;
+        }
+        return slots;
+    }
 }

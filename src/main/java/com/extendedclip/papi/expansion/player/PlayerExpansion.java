@@ -21,21 +21,28 @@
 
 package com.extendedclip.papi.expansion.player;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 
-public class PlayerExpansion extends PlaceholderExpansion {
+import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
+
+public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
+
+    private String low, medium, high;
 
     @Override
     public String getIdentifier() {
@@ -52,13 +59,38 @@ public class PlayerExpansion extends PlaceholderExpansion {
         return VERSION;
     }
 
+    @Override
+    public Map<String, Object> getDefaults() {
+        Map<String, Object> defaults = new HashMap<>();
+        defaults.put("ping_color.high", "&a");
+        defaults.put("ping_color.medium", "&e");
+        defaults.put("ping_color.low", "&c");
+        return defaults;
+    }
+
     public String onRequest(OfflinePlayer player, String identifier) {
+        high = this.getString("ping_color.high", "&a");
+        medium = this.getString("ping_color.medium", "&e");
+        low = this.getString("ping_color.low", "&c");
 
         if (identifier.startsWith("ping_")) {
-            identifier = identifier.split("ping_")[1];
-            Player t = Bukkit.getPlayer(identifier);
-            if (t != null) {
-                return getPing(t);
+            if (identifier.split("ping_").length > 1) {
+                identifier = identifier.split("ping_")[1];
+                Player t = Bukkit.getPlayer(identifier);
+                if (t != null) {
+                    return getPing(t);
+                }
+            }
+            return "0";
+        }
+        if (identifier.startsWith("colored_ping_")) {
+            if (identifier.split("colored_ping_").length > 1) {
+                identifier = identifier.split("colored_ping_")[1];
+                Player t = Bukkit.getPlayer(identifier);
+                if (t != null) {
+                    int p = Integer.valueOf(getPing(t));
+                    return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
+                }
             }
             return "0";
         }
@@ -96,14 +128,14 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "last_join_date":
                 return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getLastPlayed()));
             case "bed_x":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getX() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getX()) : "";
             case "bed_y":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getY() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getY()) : "";
             case "bed_z":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getZ() + "" : "";
+                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getZ()) : "";
             case "bed_world":
                 return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
-                                                                    .getName() : "";
+                        .getName() : "";
         }
 
         // online placeholders
@@ -114,25 +146,44 @@ public class PlayerExpansion extends PlaceholderExpansion {
         Player p = player.getPlayer();
 
         if (identifier.startsWith("has_permission_")) {
-            String perm = identifier.split("has_permission_")[1];
-            return bool(p.hasPermission(perm));
+            if (identifier.split("has_permission_").length > 1) {
+                String perm = identifier.split("has_permission_")[1];
+                return bool(p.hasPermission(perm));
+            }
+            return bool(false);
         }
 
         if (identifier.startsWith("item_in_hand_level_")){
-            String enchantment = identifier.split("item_in_hand_level")[1];
-            return String.valueOf(p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            if (identifier.split("item_in_hand_level_").length > 1){
+                String enchantment = identifier.split("item_in_hand_level_")[1];
+                return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            }
+            return "0";
+        }
+        if (identifier.startsWith("item_in_offhand_level_")){
+            if (identifier.split("item_in_offhand_level_").length > 1) {
+                String enchantment = identifier.split("item_in_offhand_level_")[1];
+                return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+            }
+            return "0";
         }
 
         switch (identifier) {
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > - 1);
+            case "empty_slots":
+                return String.valueOf(getEmptySlots(p));
             case "server":
             case "servername":
                 return "now available in the server expansion";
             case "displayname":
                 return p.getDisplayName();
+            case "locale":
+                return p.getLocale();
             case "gamemode":
                 return p.getGameMode().name();
+            case "direction":
+                return getCardinalDirection(p);
             case "world":
                 return p.getWorld().getName();
             case "x":
@@ -141,6 +192,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return String.valueOf(p.getLocation().getBlockY());
             case "z":
                 return String.valueOf(p.getLocation().getBlockZ());
+            case "biome":
+                return String.valueOf(p.getLocation().getBlock().getBiome());
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
@@ -174,13 +227,17 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "item_in_hand":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getItemMeta().getDisplayName() : "";
+                return String.valueOf(itemInHand(p).getType());
+            case "item_in_hand_name":
+                return itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
             case "item_in_hand_data":
-                return p.getInventory().getItemInMainHand() != null ? p.getInventory().getItemInMainHand().getDurability() + "" : "0";
+                return itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
             case "item_in_offhand":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
+                return String.valueOf(p.getInventory().getItemInOffHand().getType());
+            case "item_in_offhand_name":
+                return p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
             case "item_in_offhand_data":
-                return p.getInventory().getItemInOffHand() != null ? p.getInventory().getItemInOffHand().getDurability() + "" : "0";
+                return p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
@@ -198,19 +255,22 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "armor_helmet_data":
                 return p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
             case "armor_chestplate_name":
-              return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_chestplate_data":
                 return p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
             case "armor_leggings_name":
-              return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_leggings_data":
                 return p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
             case "armor_boots_name":
-              return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
                 return getPing(p);
+            case "colored_ping":
+                int ping = Integer.valueOf(getPing(p));
+                return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + getPing(p);
             case "time":
                 return String.valueOf(p.getPlayerTime());
             case "time_offset":
@@ -234,9 +294,9 @@ public class PlayerExpansion extends PlaceholderExpansion {
             case "world_time":
                 return String.valueOf(p.getWorld().getTime());
             case "world_time_12":
-                return PlayerUtil.format12(p.getWorld().getTime());
+                return format12(p.getWorld().getTime());
             case "world_time_24":
-                return PlayerUtil.format24(p.getWorld().getTime());
+                return format24(p.getWorld().getTime());
         }
         // return null for unknown placeholders
         return null;
@@ -244,18 +304,6 @@ public class PlayerExpansion extends PlaceholderExpansion {
 
     public String bool(boolean b) {
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-    }
-
-    public String getPing(Player p) {
-        try {
-            Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
-            Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
-            Field pingField = nmsplayer.getClass().getDeclaredField("ping");
-            return String.valueOf(pingField.getInt(nmsplayer));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "0";
     }
 
 }
