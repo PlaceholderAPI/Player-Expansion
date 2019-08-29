@@ -281,6 +281,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getSaturation());
             case "sleep_ticks":
                 return String.valueOf(p.getSleepTicks());
+            case "thunder_duration":
+                return String.valueOf(p.getWorld().getThunderDuration());
             case "ticks_lived":
                 return String.valueOf(p.getTicksLived());
             case "seconds_lived":
@@ -291,6 +293,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getTotalExperience());
             case "walk_speed":
                 return String.valueOf(p.getWalkSpeed());
+            case "weather_duration":
+                return String.valueOf(p.getWorld().getWeatherDuration());
             case "world_time":
                 return String.valueOf(p.getWorld().getTime());
             case "world_time_12":
