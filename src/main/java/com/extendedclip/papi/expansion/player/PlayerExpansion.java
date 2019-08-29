@@ -221,6 +221,8 @@ public class PlayerExpansion extends PlaceholderExpansion {
                 return String.valueOf(p.getSaturation());
             case "sleep_ticks":
                 return String.valueOf(p.getSleepTicks());
+            case "thunder_duration":
+                return String.valueOf(p.getWorld().getThunderDuration());
             case "ticks_lived":
                 return String.valueOf(p.getTicksLived());
             case "seconds_lived":
