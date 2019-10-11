@@ -136,4 +136,27 @@ public class PlayerUtil {
         }
         return slots;
     }
+
+    private static int getExperienceAtLevel(int level) {
+        if (level <= 15) {
+            return (level << 1) + 7;
+        }
+        if (level <= 30) {
+            return (level * 5) - 38;
+        }
+        return (level * 9) - 158;
+    }
+
+    public static int getTotalExperience(Player player) {
+        int experience = Math.round(getExperienceAtLevel(player.getLevel()) * player.getExp());
+        int currentLevel = player.getLevel();
+        while (currentLevel > 0) {
+            currentLevel--;
+            experience += getExperienceAtLevel(currentLevel);
+        }
+        if (experience < 0) {
+            experience = 0;
+        }
+        return experience;
+    }
 }

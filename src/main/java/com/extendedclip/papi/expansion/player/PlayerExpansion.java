@@ -212,6 +212,10 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return p.getCustomName() != null ? p.getCustomName() : p.getName();
             case "exp":
                 return String.valueOf(p.getExp());
+            case "current_exp":
+                return String.valueOf(getTotalExperience(p));
+            case "total_exp":
+                return String.valueOf(p.getTotalExperience());
             case "exp_to_level":
                 return String.valueOf(p.getExpToLevel());
             case "level":
@@ -289,8 +293,6 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getTicksLived() * 20);
             case "minutes_lived":
                 return String.valueOf((p.getTicksLived() * 20) / 60);
-            case "total_exp":
-                return String.valueOf(p.getTotalExperience());
             case "walk_speed":
                 return String.valueOf(p.getWalkSpeed());
             case "weather_duration":
