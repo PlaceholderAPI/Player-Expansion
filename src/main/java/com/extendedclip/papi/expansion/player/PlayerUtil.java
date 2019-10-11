@@ -148,7 +148,7 @@ public class PlayerUtil {
     }
 
     public static int getTotalExperience(Player player) {
-        int experience = Math.round(player.getLevel() * player.getExp());
+        int experience = Math.round(getExperienceAtLevel(player.getLevel()) * player.getExp());
         int currentLevel = player.getLevel();
         while (currentLevel > 0) {
             currentLevel--;
