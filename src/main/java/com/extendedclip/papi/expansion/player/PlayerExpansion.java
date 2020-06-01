@@ -24,6 +24,7 @@ package com.extendedclip.papi.expansion.player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -153,14 +154,14 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             return bool(false);
         }
 
-        if (identifier.startsWith("item_in_hand_level_")){
-            if (identifier.split("item_in_hand_level_").length > 1){
+        if (identifier.startsWith("item_in_hand_level_")) {
+            if (identifier.split("item_in_hand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_hand_level_")[1];
                 return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
             }
             return "0";
         }
-        if (identifier.startsWith("item_in_offhand_level_")){
+        if (identifier.startsWith("item_in_offhand_level_")) {
             if (identifier.split("item_in_offhand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_offhand_level_")[1];
                 return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
@@ -170,7 +171,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
 
         switch (identifier) {
             case "has_empty_slot":
-                return bool(p.getInventory().firstEmpty() > - 1);
+                return bool(p.getInventory().firstEmpty() > -1);
             case "empty_slots":
                 return String.valueOf(getEmptySlots(p));
             case "server":
@@ -184,6 +185,8 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return p.getGameMode().name();
             case "direction":
                 return getCardinalDirection(p);
+            case "direction_xz":
+                return getXZDirection(p);
             case "world":
                 return p.getWorld().getName();
             case "x":
@@ -194,6 +197,11 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getLocation().getBlockZ());
             case "biome":
                 return String.valueOf(p.getLocation().getBlock().getBiome());
+            case "biome_capitalize":
+                String biome = String.valueOf(p.getLocation().getBlock().getBiome());
+                return biome.substring(0, 1).toUpperCase() + biome.substring(1).toLowerCase();
+            case "light_level":
+                return String.valueOf(p.getLocation().getBlock().getLightLevel());
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
