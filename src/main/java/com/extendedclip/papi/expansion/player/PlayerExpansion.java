@@ -206,7 +206,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getLocation().getBlockZ());
             case "biome":
                 return String.valueOf(p.getLocation().getBlock().getBiome());
-            case "biome_capitalize":
+            case "biome_capitalized":
                 String biome = String.valueOf(p.getLocation().getBlock().getBiome());
                 return biome.substring(0, 1).toUpperCase() + biome.substring(1).toLowerCase();
             case "light_level":
