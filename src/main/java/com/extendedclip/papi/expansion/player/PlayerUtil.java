@@ -114,6 +114,9 @@ public class PlayerUtil {
 
     public static String getXZDirection(Player player) {
         double rotation = player.getLocation().getYaw();
+        if (rotation < 0.0D) {
+            rotation += 360.0D;
+        }
 
         if (Math.abs(rotation) <= 45 || Math.abs(rotation - 360) <= 45) {
             return "+Z";
