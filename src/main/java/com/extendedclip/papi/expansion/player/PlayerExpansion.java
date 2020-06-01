@@ -189,6 +189,15 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return getXZDirection(p);
             case "world":
                 return p.getWorld().getName();
+            case "world_type":
+                String worldName = p.getWorld().getName();
+                if (worldName.endsWith("_nether")) {
+                    return "Nether";
+                } else if (worldName.endsWith("_the_end")) {
+                    return "The End";
+                } else {
+                    return "Overworld";
+                }
             case "x":
                 return String.valueOf(p.getLocation().getBlockX());
             case "y":
