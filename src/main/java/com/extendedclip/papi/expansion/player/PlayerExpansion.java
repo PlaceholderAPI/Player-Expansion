@@ -28,10 +28,7 @@ import java.util.Optional;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
@@ -190,14 +187,15 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "world":
                 return p.getWorld().getName();
             case "world_type":
-                String worldName = p.getWorld().getName();
-                if (worldName.endsWith("_nether")) {
+                World.Environment environment = p.getWorld().getEnvironment();
+                if (environment == World.Environment.NETHER) {
                     return "Nether";
-                } else if (worldName.endsWith("_the_end")) {
+                } else if (environment == World.Environment.THE_END) {
                     return "The End";
-                } else {
+                } else if (environment == World.Environment.NORMAL) {
                     return "Overworld";
                 }
+                return "";
             case "x":
                 return String.valueOf(p.getLocation().getBlockX());
             case "y":
