@@ -68,6 +68,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         return defaults;
     }
 
+    @Override
     public String onRequest(OfflinePlayer player, String identifier) {
         high = this.getString("ping_color.high", "&a");
         medium = this.getString("ping_color.medium", "&e");
