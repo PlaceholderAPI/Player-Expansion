@@ -38,7 +38,7 @@ import java.util.Date;
 
 import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
 
-public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
+public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
 

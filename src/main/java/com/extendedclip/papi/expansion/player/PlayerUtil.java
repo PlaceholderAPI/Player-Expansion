@@ -32,7 +32,7 @@ import java.util.Locale;
  *
  *
  */
-public class PlayerUtil {
+public final class PlayerUtil {
 
   public static final int ticksAtMidnight = 18000;
   public static final int ticksPerDay = 24000;
@@ -41,6 +41,9 @@ public class PlayerUtil {
   public static final double ticksPerSecond = 1000d / 60d / 60d;
   private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
   private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
+
+  private PlayerUtil()
+  {}
 
   public static String getPing(Player p) {
     try {
