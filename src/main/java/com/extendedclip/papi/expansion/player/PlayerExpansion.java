@@ -29,6 +29,7 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
@@ -39,8 +40,6 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
 public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
-
-    private String low, medium, high;
 
     @Override
     public String getIdentifier() {
@@ -67,9 +66,9 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
     }
 
     public String onRequest(OfflinePlayer player, String identifier) {
-        high = this.getString("ping_color.high", "&a");
-        medium = this.getString("ping_color.medium", "&e");
-        low = this.getString("ping_color.low", "&c");
+        String high = this.getString("ping_color.high", "&a");
+        String medium = this.getString("ping_color.medium", "&e");
+        String low = this.getString("ping_color.low", "&c");
 
         if (identifier.startsWith("ping_")) {
             if (identifier.split("ping_").length > 1) {
@@ -86,7 +85,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 identifier = identifier.split("colored_ping_")[1];
                 Player t = Bukkit.getPlayer(identifier);
                 if (t != null) {
-                    int p = Integer.valueOf(getPing(t));
+                    int p = Integer.parseInt(getPing(t));
                     return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
                 }
             }
@@ -260,9 +259,9 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
-                return String.valueOf(p.getMaxHealth());
+                return String.valueOf(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
             case "max_health_rounded":
-                return String.valueOf(Math.round(p.getMaxHealth()));
+                return String.valueOf(Math.round(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue()));
             case "max_air":
                 return String.valueOf(p.getMaximumAir());
             case "max_no_damage_ticks":
@@ -288,7 +287,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "ping":
                 return getPing(p);
             case "colored_ping":
-                int ping = Integer.valueOf(getPing(p));
+                int ping = Integer.parseInt(getPing(p));
                 return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + getPing(p);
             case "time":
                 return String.valueOf(p.getPlayerTime());

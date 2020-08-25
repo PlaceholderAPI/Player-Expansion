@@ -38,16 +38,15 @@ public class PlayerUtil {
     public static final int ticksPerDay = 24000;
     public static final int ticksPerHour = 1000;
     public static final double ticksPerMinute = 1000d / 60d;
-    public static final double ticksPerSecond = 1000d / 60d / 60d;
     private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
     private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
 
     public static String getPing(Player p) {
         try {
-            Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
-            Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
-            Field pingField = nmsplayer.getClass().getDeclaredField("ping");
-            return String.valueOf(pingField.getInt(nmsplayer));
+            Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle");
+            Object nmsPlayer = getHandleMethod.invoke(p);
+            Field pingField = nmsPlayer.getClass().getDeclaredField("ping");
+            return String.valueOf(pingField.getInt(nmsPlayer));
         } catch (Exception e) {
             e.printStackTrace();
         }
