@@ -177,4 +177,16 @@ public class PlayerUtil {
         }
         return experience;
     }
+
+    public static String getBiome(Player p) {
+        return String.valueOf(p.getLocation().getBlock().getBiome());
+    }
+
+    public static String getCapitalizedBiome(Player p) {
+        String[] biomeWords = getBiome(p).split("_");
+        for (int i = 0; i < biomeWords.length; i++) {
+            biomeWords[i] = biomeWords[i].substring(0, 1).toUpperCase() + biomeWords[i].substring(1).toLowerCase();
+        }
+        return String.join(" ", biomeWords);
+    }
 }
