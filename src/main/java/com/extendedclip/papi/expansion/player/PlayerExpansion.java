@@ -31,6 +31,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Biome;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 
@@ -143,7 +144,7 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             return "";
         }
 
-        Player p = player.getPlayer();
+        final Player p = player.getPlayer();
 
         if (identifier.startsWith("has_permission_")) {
             if (identifier.split("has_permission_").length > 1) {
@@ -192,8 +193,20 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return String.valueOf(p.getLocation().getBlockY());
             case "z":
                 return String.valueOf(p.getLocation().getBlockZ());
+            case "yaw":
+                return String.valueOf(p.getLocation().getYaw());
+            case "pitch":
+                return String.valueOf(p.getLocation().getPitch());
             case "biome":
                 return String.valueOf(p.getLocation().getBlock().getBiome());
+            case "biome_formatted":
+                final Biome biome = p.getLocation().getBlock().getBiome();
+                final String[] words = String.valueOf(biome).split("_");
+                String biomeFormatted = "";
+                for (String word : words) {
+                    biomeFormatted += (word.charAt(0) + word.substring(1).toLowerCase() + " ");
+                }
+                return (biomeFormatted);
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
