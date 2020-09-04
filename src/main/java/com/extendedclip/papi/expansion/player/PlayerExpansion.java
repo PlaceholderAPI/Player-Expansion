@@ -33,6 +33,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Date;
 
@@ -151,6 +152,14 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
                 return bool(p.hasPermission(perm));
             }
             return bool(false);
+        }
+        
+        if (identifier.startsWith("has_potioneffect_")) {
+          if (identifier.split("has_potioneffect_").length > 1) {
+            String effect = identifier.split("has_potioneffect_")[1];
+            PotionEffectType potion = PotionEffectType.getByName(effect);
+            return bool(p.hasPotionEffect(potion));
+          }
         }
 
         if (identifier.startsWith("item_in_hand_level_")){
