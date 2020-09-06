@@ -14,6 +14,6 @@ import at.helpch.placeholderapi.api.expansion.Platform;
 public final class PlayerExpansion extends Expansion {
     @Override
     public void enable() {
-
+        
     }
 }
