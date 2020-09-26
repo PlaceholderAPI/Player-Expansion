@@ -187,6 +187,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return String.valueOf(p.getLocation().getBlockY());
             case "z":
                 return String.valueOf(p.getLocation().getBlockZ());
+            case "yaw":
+                return String.valueOf(p.getLocation().getYaw());
+            case "pitch":
+                return String.valueOf(p.getLocation().getPitch());
             case "biome":
                 return String.valueOf(p.getLocation().getBlock().getBiome());
             case "ip":
