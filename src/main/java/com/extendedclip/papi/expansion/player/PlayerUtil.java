@@ -7,10 +7,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.function.Function;
 
 /*
  *
@@ -32,7 +34,7 @@ import java.util.Locale;
  *
  *
  */
-public class PlayerUtil {
+public final class PlayerUtil {
 
   public static final int ticksAtMidnight = 18000;
   public static final int ticksPerDay = 24000;
@@ -42,16 +44,56 @@ public class PlayerUtil {
   private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
   private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
 
-  public static String getPing(Player p) {
-    try {
-      Method getHandleMethod = p.getClass().getDeclaredMethod("getHandle", new Class[0]);
-      Object nmsplayer = getHandleMethod.invoke(p, new Object[0]);
-      Field pingField = nmsplayer.getClass().getDeclaredField("ping");
-      return String.valueOf(pingField.getInt(nmsplayer));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return "0";
+  private PlayerUtil()
+  {}
+
+  private static final Function<Player, Integer> PLAYER_GET_PING = new Function<Player, Integer>() {
+
+      private Field  ping;
+      private Method getHandle;
+
+      @Override
+      public Integer apply(final Player player)
+      {
+          if (ping == null)
+          {
+              try
+              {
+                  cacheReflection(player);
+              }
+              catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException ex)
+              {
+                  ex.printStackTrace();
+              }
+          }
+
+          try
+          {
+              return ping.getInt(getHandle.invoke(player));
+          }
+          catch (final IllegalAccessException | InvocationTargetException ex)
+          {
+              ex.printStackTrace();
+          }
+          return -1;
+      }
+
+
+      private void cacheReflection(final Player player) throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
+      {
+          getHandle = player.getClass().getDeclaredMethod("getHandle");
+          getHandle.setAccessible(true);
+
+          final Object entityPlayer = getHandle.invoke(player);
+
+          ping = entityPlayer.getClass().getDeclaredField("ping");
+          ping.setAccessible(true);
+      }
+  };
+
+
+  public static int getPing(final Player player) {
+      return PLAYER_GET_PING.apply(player);
   }
 
   public static String format12(long ticks) {
