@@ -188,11 +188,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "biome_formatted":
                 final Biome biome = p.getLocation().getBlock().getBiome();
                 final String[] words = String.valueOf(biome).split("_");
-                String biomeFormatted = "";
+                StringBuilder biomeFormatted = new StringBuilder();
                 for (String word : words) {
-                    biomeFormatted += (word.charAt(0) + word.substring(1).toLowerCase() + " ");
+                    biomeFormatted.append(word.charAt(0)).append(word.substring(1).toLowerCase()).append(" ");
                 }
-                return (biomeFormatted);
+                return (biomeFormatted.toString());
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
