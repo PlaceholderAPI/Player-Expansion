@@ -39,11 +39,13 @@ import java.util.Date;
 
 import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
 
-public class PlayerExpansion extends PlaceholderExpansion implements Configurable {
+public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
     private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-    private String low, medium, high;
+    private String low;
+    private String medium;
+    private String high;
 
     @Override
     public String getIdentifier() {
@@ -63,37 +65,21 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
     @Override
     public Map<String, Object> getDefaults() {
         Map<String, Object> defaults = new HashMap<>();
-        defaults.put("ping_color.high", "&a");
+        defaults.put("ping_color.high", "&c");
         defaults.put("ping_color.medium", "&e");
-        defaults.put("ping_color.low", "&c");
+        defaults.put("ping_color.low", "&a");
         return defaults;
     }
 
+    @Override
     public String onRequest(OfflinePlayer player, String identifier) {
-        high = this.getString("ping_color.high", "&a");
-        medium = this.getString("ping_color.medium", "&e");
-        low = this.getString("ping_color.low", "&c");
 
-        if (identifier.startsWith("ping_")) {
-            if (identifier.split("ping_").length > 1) {
-                identifier = identifier.split("ping_")[1];
-                Player t = Bukkit.getPlayer(identifier);
-                if (t != null) {
-                    return getPing(t);
-                }
-            }
-            return "0";
-        }
-        if (identifier.startsWith("colored_ping_")) {
-            if (identifier.split("colored_ping_").length > 1) {
-                identifier = identifier.split("colored_ping_")[1];
-                Player t = Bukkit.getPlayer(identifier);
-                if (t != null) {
-                    int p = Integer.valueOf(getPing(t));
-                    return ChatColor.translateAlternateColorCodes('&', p > 100 ? low : p >= 50 ? medium : high) + getPing(t);
-                }
-            }
-            return "0";
+        final boolean targetedPing = identifier.startsWith("ping_");
+        if (targetedPing || identifier.startsWith("colored_ping_"))
+        {
+            final Player target = Bukkit.getPlayer(identifier.substring(targetedPing ? 5 : 13)); // yes, I know, magic value
+
+            return target == null ? "0" : retrievePing(target, false);
         }
 
         if (player == null) {
@@ -284,10 +270,9 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
             case "ping":
-                return getPing(p);
+                return retrievePing(p, false);
             case "colored_ping":
-                int ping = Integer.valueOf(getPing(p));
-                return ChatColor.translateAlternateColorCodes('&', ping > 100 ? low : ping >= 50 ? medium : high) + getPing(p);
+                return retrievePing(p, true);
             case "time":
                 return String.valueOf(p.getPlayerTime());
             case "time_offset":
@@ -321,8 +306,30 @@ public class PlayerExpansion extends PlaceholderExpansion implements Configurabl
         return null;
     }
 
+    @Override
+    public boolean register()
+    {
+        low = this.getString("ping_color.low", "&a");
+        medium = this.getString("ping_color.medium", "&e");
+        high = this.getString("ping_color.high", "&c");
+
+        return super.register();
+    }
+
     public String bool(boolean b) {
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+    }
+
+
+    private String retrievePing(final Player player, final boolean colored)
+    {
+        final int ping = PlayerUtil.getPing(player);
+        if (!colored)
+        {
+            return String.valueOf(ping);
+        }
+
+        return ChatColor.translateAlternateColorCodes('&', ping > 100 ? high : ping > 50 ? medium : low) + ping;
     }
 
 }
