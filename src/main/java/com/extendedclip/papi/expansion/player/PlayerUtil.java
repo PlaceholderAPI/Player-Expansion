@@ -36,13 +36,12 @@ import java.util.function.Function;
  */
 public final class PlayerUtil {
 
-  public static final int ticksAtMidnight = 18000;
-  public static final int ticksPerDay = 24000;
-  public static final int ticksPerHour = 1000;
-  public static final double ticksPerMinute = 1000d / 60d;
-  public static final double ticksPerSecond = 1000d / 60d / 60d;
-  private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
-  private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
+    public static final int ticksAtMidnight = 18000;
+    public static final int ticksPerDay = 24000;
+    public static final int ticksPerHour = 1000;
+    public static final double ticksPerMinute = 1000d / 60d;
+    private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+    private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
 
   private PlayerUtil()
   {}
@@ -96,71 +95,90 @@ public final class PlayerUtil {
       return PLAYER_GET_PING.apply(player);
   }
 
-  public static String format12(long ticks) {
-    try {
-      return twelve.format(twentyFour.parse(ticksToTime(ticks)));
-    } catch (ParseException e) {
-      return ticksToTime(ticks);
+    public static String format12(long ticks) {
+        try {
+            return twelve.format(twentyFour.parse(ticksToTime(ticks)));
+        } catch (ParseException e) {
+            return ticksToTime(ticks);
+        }
     }
-  }
 
-  public static String format24(long ticks) {
-    return ticksToTime(ticks);
-  }
+    public static String format24(long ticks) {
+        return ticksToTime(ticks);
+    }
 
-  private static String ticksToTime(long ticks) {
-    ticks = ticks - ticksAtMidnight + ticksPerDay;
-    long hours = ticks / ticksPerHour;
-    ticks -= hours * ticksPerHour;
-    long mins = (long) Math.floor(ticks / ticksPerMinute);
-    if (hours >= 24) {
-      hours = hours - 24;
+    private static String ticksToTime(long ticks) {
+        ticks = ticks - ticksAtMidnight + ticksPerDay;
+        long hours = ticks / ticksPerHour;
+        ticks -= hours * ticksPerHour;
+        long mins = (long) Math.floor(ticks / ticksPerMinute);
+        if (hours >= 24) {
+            hours = hours - 24;
+        }
+        return (hours < 10 ? "0" + hours : hours) + ":" + (mins < 10 ? "0" + mins : mins);
     }
-    return (hours < 10 ? "0" + hours : hours) + ":" + (mins < 10 ? "0" + mins : mins);
-  }
 
-  public static String getCardinalDirection(Player player) {
-    double rotation = player.getLocation().getYaw() - 180.0F;
-    if (rotation < 0.0D) {
-      rotation += 360.0D;
+    public static String getCardinalDirection(Player player) {
+        double rotation = player.getLocation().getYaw() - 180.0F;
+        if (rotation < 0.0D) {
+            rotation += 360.0D;
+        }
+        if ((0.0D <= rotation) && (rotation < 22.5D)) {
+            return "N";
+        }
+        if ((22.5D <= rotation) && (rotation < 67.5D)) {
+            return "NE";
+        }
+        if ((67.5D <= rotation) && (rotation < 112.5D)) {
+            return "E";
+        }
+        if ((112.5D <= rotation) && (rotation < 157.5D)) {
+            return "SE";
+        }
+        if ((157.5D <= rotation) && (rotation < 202.5D)) {
+            return "S";
+        }
+        if ((202.5D <= rotation) && (rotation < 247.5D) || (rotation <= -119.33) && (rotation > -179)) {
+            return "SW";
+        }
+        if ((247.5D <= rotation) && (rotation < 292.5D) || (rotation <= -59.66) && (rotation > -119.33)) {
+            return "W";
+        }
+        if ((292.5D <= rotation) && (rotation < 337.5D) || (rotation <= -0.0) && (rotation > -59.66)) {
+            return "NW";
+        }
+        if ((337.5D <= rotation) && (rotation < 360.0D)) {
+            return "N";
+        }
+        return "";
     }
-    if ((0.0D <= rotation) && (rotation < 22.5D)) {
-      return "N";
-    }
-    if ((22.5D <= rotation) && (rotation < 67.5D)) {
-      return "NE";
-    }
-    if ((67.5D <= rotation) && (rotation < 112.5D)) {
-      return "E";
-    }
-    if ((112.5D <= rotation) && (rotation < 157.5D)) {
-      return "SE";
-    }
-    if ((157.5D <= rotation) && (rotation < 202.5D)) {
-      return "S";
-    }
-    if ((202.5D <= rotation) && (rotation < 247.5D) || (rotation <= -119.33) && (rotation > -179)) {
-      return "SW";
-    }
-    if ((247.5D <= rotation) && (rotation < 292.5D) || (rotation <= -59.66) && (rotation > -119.33)) {
-      return "W";
-    }
-    if ((292.5D <= rotation) && (rotation < 337.5D) || (rotation <= -0.0) && (rotation > -59.66)) {
-      return "NW";
-    }
-    if ((337.5D <= rotation) && (rotation < 360.0D)) {
-      return "N";
-    }
-    return "";
-  }
 
-  public static ItemStack itemInHand(Player p) {
-    try {
-      return p.getInventory().getItemInMainHand();
-    } catch (NoSuchMethodError e) {
-      return p.getInventory().getItemInHand();
+    public static String getXZDirection(Player player) {
+        double rotation = player.getLocation().getYaw();
+        if (rotation < 0.0D) {
+            rotation += 360.0D;
+        }
+
+        if (Math.abs(rotation) <= 45 || Math.abs(rotation - 360) <= 45) {
+            return "+Z";
+        } else if (Math.abs(rotation - 90) <= 45) {
+            return "-X";
+        } else if (Math.abs(rotation - 180) <= 45) {
+            return "-Z";
+        } else if (Math.abs(rotation - 270) <= 45) {
+            return "+X";
+        }
+
+        return "";
     }
-  }
+
+    public static ItemStack itemInHand(Player p) {
+        try {
+            return p.getInventory().getItemInMainHand();
+        } catch (NoSuchMethodError e) {
+            return p.getInventory().getItemInHand();
+        }
+    }
 
     public static int getEmptySlots(Player p) {
         int slots = 0;
@@ -170,11 +188,11 @@ public final class PlayerUtil {
         }
 
         if (!Bukkit.getBukkitVersion().contains("1.7") && !Bukkit.getBukkitVersion().contains("1.8")) {
-          if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
-          if (inv.getHelmet() == null) slots--;
-          if (inv.getChestplate() == null) slots--;
-          if (inv.getLeggings() == null) slots--;
-          if (inv.getBoots() == null) slots--;
+            if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
+            if (inv.getHelmet() == null) slots--;
+            if (inv.getChestplate() == null) slots--;
+            if (inv.getLeggings() == null) slots--;
+            if (inv.getBoots() == null) slots--;
         }
         return slots;
     }
@@ -200,5 +218,17 @@ public final class PlayerUtil {
             experience = 0;
         }
         return experience;
+    }
+
+    public static String getBiome(Player p) {
+        return String.valueOf(p.getLocation().getBlock().getBiome());
+    }
+
+    public static String getCapitalizedBiome(Player p) {
+        String[] biomeWords = getBiome(p).split("_");
+        for (int i = 0; i < biomeWords.length; i++) {
+            biomeWords[i] = biomeWords[i].substring(0, 1).toUpperCase() + biomeWords[i].substring(1).toLowerCase();
+        }
+        return String.join(" ", biomeWords);
     }
 }

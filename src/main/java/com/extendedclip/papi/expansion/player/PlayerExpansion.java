@@ -24,13 +24,12 @@ package com.extendedclip.papi.expansion.player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -139,7 +138,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             }
             return bool(false);
         }
-        
+
         if (identifier.startsWith("has_potioneffect_")) {
           if (identifier.split("has_potioneffect_").length > 1) {
             String effect = identifier.split("has_potioneffect_")[1];
@@ -148,14 +147,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
           }
         }
 
-        if (identifier.startsWith("item_in_hand_level_")){
-            if (identifier.split("item_in_hand_level_").length > 1){
+        if (identifier.startsWith("item_in_hand_level_")) {
+            if (identifier.split("item_in_hand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_hand_level_")[1];
                 return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
             }
             return "0";
         }
-        if (identifier.startsWith("item_in_offhand_level_")){
+        if (identifier.startsWith("item_in_offhand_level_")) {
             if (identifier.split("item_in_offhand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_offhand_level_")[1];
                 return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
@@ -165,7 +164,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
         switch (identifier) {
             case "has_empty_slot":
-                return bool(p.getInventory().firstEmpty() > - 1);
+                return bool(p.getInventory().firstEmpty() > -1);
             case "empty_slots":
                 return String.valueOf(getEmptySlots(p));
             case "server":
@@ -179,8 +178,20 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return p.getGameMode().name();
             case "direction":
                 return getCardinalDirection(p);
+            case "direction_xz":
+                return getXZDirection(p);
             case "world":
                 return p.getWorld().getName();
+            case "world_type":
+                World.Environment environment = p.getWorld().getEnvironment();
+                if (environment == World.Environment.NETHER) {
+                    return "Nether";
+                } else if (environment == World.Environment.THE_END) {
+                    return "The End";
+                } else if (environment == World.Environment.NORMAL) {
+                    return "Overworld";
+                }
+                return "";
             case "x":
                 return String.valueOf(p.getLocation().getBlockX());
             case "y":
@@ -192,7 +203,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "pitch":
                 return String.valueOf(p.getLocation().getPitch());
             case "biome":
-                return String.valueOf(p.getLocation().getBlock().getBiome());
+                return getBiome(p);
+            case "biome_capitalized":
+                return getCapitalizedBiome(p);
+            case "light_level":
+                return String.valueOf(p.getLocation().getBlock().getLightLevel());
             case "ip":
                 return p.getAddress().getAddress().getHostAddress();
             case "allow_flight":
