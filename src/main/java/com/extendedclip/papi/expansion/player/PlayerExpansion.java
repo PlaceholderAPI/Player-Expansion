@@ -21,22 +21,32 @@
 
 package com.extendedclip.papi.expansion.player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getBiome;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getCapitalizedBiome;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getCardinalDirection;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getEmptySlots;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperience;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
 
 public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
@@ -74,8 +84,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     public String onRequest(OfflinePlayer player, String identifier) {
 
         final boolean targetedPing = identifier.startsWith("ping_");
-        if (targetedPing || identifier.startsWith("colored_ping_"))
-        {
+        if (targetedPing || identifier.startsWith("colored_ping_")) {
             final Player target = Bukkit.getPlayer(identifier.substring(targetedPing ? 5 : 13)); // yes, I know, magic value
 
             return target == null ? "0" : retrievePing(target, false);
@@ -140,11 +149,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         }
 
         if (identifier.startsWith("has_potioneffect_")) {
-          if (identifier.split("has_potioneffect_").length > 1) {
-            String effect = identifier.split("has_potioneffect_")[1];
-            PotionEffectType potion = PotionEffectType.getByName(effect);
-            return bool(p.hasPotionEffect(potion));
-          }
+            if (identifier.split("has_potioneffect_").length > 1) {
+                String effect = identifier.split("has_potioneffect_")[1];
+                PotionEffectType potion = PotionEffectType.getByName(effect);
+                return bool(p.hasPotionEffect(potion));
+            }
         }
 
         if (identifier.startsWith("item_in_hand_level_")) {
@@ -322,8 +331,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     }
 
     @Override
-    public boolean register()
-    {
+    public boolean register() {
         low = this.getString("ping_color.low", "&a");
         medium = this.getString("ping_color.medium", "&e");
         high = this.getString("ping_color.high", "&c");
@@ -336,11 +344,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     }
 
 
-    private String retrievePing(final Player player, final boolean colored)
-    {
+    private String retrievePing(final Player player, final boolean colored) {
         final int ping = PlayerUtil.getPing(player);
-        if (!colored)
-        {
+        if (!colored) {
             return String.valueOf(ping);
         }
 
