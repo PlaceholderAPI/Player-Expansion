@@ -140,6 +140,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
         Player p = player.getPlayer();
 
+        if (p == null) return "";
+
         if (identifier.startsWith("has_permission_")) {
             if (identifier.split("has_permission_").length > 1) {
                 String perm = identifier.split("has_permission_")[1];
