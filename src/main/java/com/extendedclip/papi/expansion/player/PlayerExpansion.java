@@ -173,7 +173,22 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             return "0";
         }
 
+        if (identifier.startsWith("can_craft_")) {
+            if (identifier.split("can_craft_").length > 1) {
+                String recipeName = identifier.split("can_craft_")[1];
+                try {
+                    return bool(p.hasDiscoveredRecipe(NamespacedKey.minecraft(recipeName)));
+                } catch (IllegalArgumentException e) {
+                    return "invalid recipe"; // could be false instead
+                }
+            }
+            return bool(false);
+        }
+
+
         switch (identifier) {
+            case "recipes":
+                return p.getDiscoveredRecipes().toString(); // sort of ugly (i dont see the use case either)
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > -1);
             case "empty_slots":
