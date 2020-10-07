@@ -24,11 +24,7 @@ package com.extendedclip.papi.expansion.player;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -38,15 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getBiome;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getCapitalizedBiome;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getCardinalDirection;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getEmptySlots;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperience;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.*;
 
 public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
 
