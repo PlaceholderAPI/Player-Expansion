@@ -312,9 +312,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "ticks_lived":
                 return String.valueOf(p.getTicksLived());
             case "seconds_lived":
-                return String.valueOf(p.getTicksLived() * 20);
+                return String.valueOf(p.getTicksLived() / 20);
             case "minutes_lived":
-                return String.valueOf((p.getTicksLived() * 20) / 60);
+                return String.valueOf((p.getTicksLived() / 20) / 60);
             case "walk_speed":
                 return String.valueOf(p.getWalkSpeed());
             case "weather_duration":
