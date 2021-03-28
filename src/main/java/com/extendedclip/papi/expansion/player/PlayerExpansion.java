@@ -49,9 +49,6 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
 
 public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
-
-    private final String VERSION = getClass().getPackage().getImplementationVersion();
-
     private String low;
     private String medium;
     private String high;
@@ -68,7 +65,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
     @Override
     public String getVersion() {
-        return VERSION;
+        return "1.8.0";
     }
 
     @Override
