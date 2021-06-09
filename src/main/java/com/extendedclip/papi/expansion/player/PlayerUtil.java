@@ -43,57 +43,87 @@ public final class PlayerUtil {
     private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
     private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
 
-  private PlayerUtil()
-  {}
+    private PlayerUtil() {
+    }
 
-  private static final Function<Player, Integer> PLAYER_GET_PING = new Function<Player, Integer>() {
+    private static final Function<Player, Integer> PLAYER_GET_PING = new Function<Player, Integer>() {
 
-      private Field  ping;
-      private Method getHandle;
+        private Field ping;
+        private Method getHandle;
 
-      @Override
-      public Integer apply(final Player player)
-      {
-          if (ping == null)
-          {
-              try
-              {
-                  cacheReflection(player);
-              }
-              catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException ex)
-              {
-                  ex.printStackTrace();
-              }
-          }
+        @Override
+        public Integer apply(final Player player) {
+            if (ping == null) {
+                try {
+                    cacheReflection(player);
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException ex) {
+                    ex.printStackTrace();
+                }
+            }
 
-          try
-          {
-              return ping.getInt(getHandle.invoke(player));
-          }
-          catch (final IllegalAccessException | InvocationTargetException ex)
-          {
-              ex.printStackTrace();
-          }
-          return -1;
-      }
+            try {
+                return ping.getInt(getHandle.invoke(player));
+            } catch (final IllegalAccessException | InvocationTargetException ex) {
+                ex.printStackTrace();
+            }
+            return -1;
+        }
 
 
-      private void cacheReflection(final Player player) throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
-      {
-          getHandle = player.getClass().getDeclaredMethod("getHandle");
-          getHandle.setAccessible(true);
+        private void cacheReflection(final Player player) throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            getHandle = player.getClass().getDeclaredMethod("getHandle");
+            getHandle.setAccessible(true);
 
-          final Object entityPlayer = getHandle.invoke(player);
+            final Object entityPlayer = getHandle.invoke(player);
 
-          ping = entityPlayer.getClass().getDeclaredField("ping");
-          ping.setAccessible(true);
-      }
-  };
+            ping = entityPlayer.getClass().getDeclaredField("ping");
+            ping.setAccessible(true);
+        }
+    };
+
+    private static final Function<Player, String> PLAYER_GET_LOCALE = new Function<Player, String>() {
+
+        private Field locale;
+        private Method getHandle;
+
+        @Override
+        public String apply(final Player player) {
+            if (locale == null) {
+                try {
+                    cacheReflection(player);
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | NoSuchFieldException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            try {
+                final Object entityPlayer = getHandle.invoke(player);
+                return (String) locale.get(entityPlayer);
+            } catch (final IllegalAccessException | InvocationTargetException ex) {
+                ex.printStackTrace();
+            }
+            return "en_US";
+        }
 
 
-  public static int getPing(final Player player) {
-      return PLAYER_GET_PING.apply(player);
-  }
+        private void cacheReflection(final Player player) throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+            getHandle = player.getClass().getDeclaredMethod("getHandle");
+            getHandle.setAccessible(true);
+
+            final Object entityPlayer = getHandle.invoke(player);
+
+            locale = entityPlayer.getClass().getField("locale");
+        }
+    };
+
+
+    public static int getPing(final Player player) {
+        return PLAYER_GET_PING.apply(player);
+    }
+
+    public static String getLocale(final Player player) {
+        return PLAYER_GET_LOCALE.apply(player);
+    }
 
     public static String format12(long ticks) {
         try {

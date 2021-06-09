@@ -33,10 +33,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
@@ -128,6 +125,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "bed_world":
                 return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
                         .getName() : "";
+
         }
 
         // online placeholders
@@ -168,6 +166,33 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             return "0";
         }
 
+        if (identifier.startsWith("locale")) {
+            String localeStr = PlayerUtil.getLocale(p);
+            String localeStrISO = localeStr.replace("_", "-");
+
+            switch (identifier) {
+                case "locale":
+                    return localeStr;
+                case "locale_country":
+                    Locale locale = Locale.forLanguageTag(localeStrISO);
+                    if (locale == null)
+                        return "";
+                    return locale.getCountry();
+                case "locale_display_country":
+                    locale = Locale.forLanguageTag(localeStrISO);
+                    if (locale == null)
+                        return "";
+                    return locale.getDisplayCountry();
+                case "locale_display_name":
+                    locale = Locale.forLanguageTag(localeStrISO);
+                    if (locale == null)
+                        return "";
+                    return locale.getDisplayName();
+                case "locale_short":
+                    return localeStr.substring(0, localeStr.indexOf("_"));
+            }
+        }
+
         switch (identifier) {
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > -1);
@@ -178,8 +203,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return "now available in the server expansion";
             case "displayname":
                 return p.getDisplayName();
-            case "locale":
-                return p.getLocale();
             case "gamemode":
                 return p.getGameMode().name();
             case "direction":
@@ -322,6 +345,22 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return format12(p.getWorld().getTime());
             case "world_time_24":
                 return format24(p.getWorld().getTime());
+            case "is_flying":
+                return bool(p.isFlying());
+            case "is_sleeping":
+                return bool(p.isSleeping());
+            case "is_conversing":
+                return bool(p.isConversing());
+            case "is_dead":
+                return bool(p.isDead());
+            case "is_sneaking":
+                return bool(p.isSneaking());
+            case "is_sprinting":
+                return bool(p.isSprinting());
+            case "is_leashed":
+                return bool(p.isLeashed());
+            case "is_inside_vehicle":
+                return bool(p.isInsideVehicle());
         }
         // return null for unknown placeholders
         return null;
