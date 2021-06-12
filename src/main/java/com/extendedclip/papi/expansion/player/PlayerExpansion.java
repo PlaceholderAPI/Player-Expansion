@@ -34,6 +34,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
@@ -62,7 +64,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
     @Override
     public String getVersion() {
-        return "1.8.0";
+        return "1.9.0";
     }
 
     @Override
@@ -387,6 +389,26 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         }
 
         return ChatColor.translateAlternateColorCodes('&', ping > 100 ? high : ping > 50 ? medium : low) + ping;
+    }
+
+    /**
+     * Helper method to return the major version that the server is running.
+     *
+     * This is needed because in 1.17, NMS is no longer versioned.
+     *
+     * @return the major version of Minecraft the server is running
+     */
+    public static int minecraftVersion() {
+        try {
+            final Matcher matcher = Pattern.compile("\\(MC: (\\d)\\.(\\d+)\\.?(\\d+?)?\\)").matcher(Bukkit.getVersion());
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.toMatchResult().group(2), 10);
+            } else {
+                throw new IllegalArgumentException(String.format("No match found in '%s'", Bukkit.getVersion()));
+            }
+        } catch (final IllegalArgumentException ex) {
+            throw new RuntimeException("Failed to determine Minecraft version", ex);
+        }
     }
 
 }

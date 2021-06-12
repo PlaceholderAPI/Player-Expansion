@@ -76,7 +76,7 @@ public final class PlayerUtil {
 
             final Object entityPlayer = getHandle.invoke(player);
 
-            ping = entityPlayer.getClass().getDeclaredField("ping");
+            ping = entityPlayer.getClass().getDeclaredField(PlayerExpansion.minecraftVersion() >= 17 ? "e" : "ping");
             ping.setAccessible(true);
         }
     };
