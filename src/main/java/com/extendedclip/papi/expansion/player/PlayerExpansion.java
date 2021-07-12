@@ -225,10 +225,16 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return "";
             case "x":
                 return String.valueOf(p.getLocation().getBlockX());
+            case "x_long":
+                return String.valueOf(p.getLocation().getX());
             case "y":
                 return String.valueOf(p.getLocation().getBlockY());
+            case "y_long":
+                return String.valueOf(p.getLocation().getY());
             case "z":
                 return String.valueOf(p.getLocation().getBlockZ());
+            case "z_long":
+                return String.valueOf(p.getLocation().getZ());
             case "yaw":
                 return String.valueOf(p.getLocation().getYaw());
             case "pitch":
