@@ -230,8 +230,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "compass_world":
                 return p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
             case "block_underneath":
-                Location loc = Objects.requireNonNull(player.getPlayer()).getLocation().clone().subtract(0, 1, 0);
-                return String.valueOf(loc.getBlock().getType());
+                return String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
             case "custom_name":
                 return p.getCustomName() != null ? p.getCustomName() : p.getName();
             case "exp":
