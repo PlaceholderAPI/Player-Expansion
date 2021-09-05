@@ -36,7 +36,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getBiome;
@@ -287,12 +287,16 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
             case "item_in_hand_data":
                 return itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
+            case "item_in_hand_durability":
+                return String.valueOf(durability(itemInHand(p)));
             case "item_in_offhand":
                 return String.valueOf(p.getInventory().getItemInOffHand().getType());
             case "item_in_offhand_name":
                 return p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
             case "item_in_offhand_data":
                 return p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
+            case "item_in_offhand_durability":
+                return String.valueOf(durability(p.getInventory().getItemInOffHand()));
             case "last_damage":
                 return String.valueOf(p.getLastDamage());
             case "max_health":
@@ -309,18 +313,26 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_helmet_data":
                 return p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
+            case "armor_helmet_durability":
+                return String.valueOf(durability(p.getInventory().getHelmet()));
             case "armor_chestplate_name":
                 return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_chestplate_data":
                 return p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
+            case "armor_chestplate_durability":
+                return String.valueOf(durability(p.getInventory().getChestplate()));
             case "armor_leggings_name":
                 return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_leggings_data":
                 return p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
+            case "armor_leggings_durability":
+                return String.valueOf(durability(p.getInventory().getLeggings()));
             case "armor_boots_name":
                 return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
             case "armor_boots_data":
                 return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
+            case "armor_boots_durability":
+                return String.valueOf(durability(p.getInventory().getBoots()));
             case "ping":
                 return retrievePing(p, false);
             case "colored_ping":

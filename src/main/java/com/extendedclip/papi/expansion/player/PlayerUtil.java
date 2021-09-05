@@ -210,6 +210,10 @@ public final class PlayerUtil {
         }
     }
 
+    public static int durability(ItemStack item) {
+        return item != null ? item.getType().getMaxDurability() - item.getDurability() : 0;
+    }
+
     public static int getEmptySlots(Player p) {
         int slots = 0;
         PlayerInventory inv = p.getInventory();
