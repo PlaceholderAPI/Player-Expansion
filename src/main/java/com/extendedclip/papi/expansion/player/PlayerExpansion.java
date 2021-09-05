@@ -32,6 +32,7 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.Location;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -259,6 +260,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockZ()) : "";
             case "compass_world":
                 return p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
+            case "block_underneath":
+                return String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
             case "custom_name":
                 return p.getCustomName() != null ? p.getCustomName() : p.getName();
             case "exp":
