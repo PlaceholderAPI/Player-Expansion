@@ -53,6 +53,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     private String medium;
     private String high;
 
+    private int mediumValue;
+    private int highValue;
+
     @Override
     public String getIdentifier() {
         return "player";
@@ -74,6 +77,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         defaults.put("ping_color.high", "&c");
         defaults.put("ping_color.medium", "&e");
         defaults.put("ping_color.low", "&a");
+        defaults.put("ping_value.medium", 50);
+        defaults.put("ping_value.high", 100);
         return defaults;
     }
 
@@ -394,6 +399,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         low = this.getString("ping_color.low", "&a");
         medium = this.getString("ping_color.medium", "&e");
         high = this.getString("ping_color.high", "&c");
+        mediumValue = this.getInt("ping_value.medium", 50);
+        highValue = this.getInt("ping_value.high", 100);
+
 
         return super.register();
     }
@@ -409,7 +417,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             return String.valueOf(ping);
         }
 
-        return ChatColor.translateAlternateColorCodes('&', ping > 100 ? high : ping > 50 ? medium : low) + ping;
+        return ChatColor.translateAlternateColorCodes('&', ping > highValue ? high : ping > mediumValue ? medium : low) + ping;
     }
 
     /**
