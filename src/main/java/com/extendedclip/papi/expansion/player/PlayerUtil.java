@@ -2,6 +2,7 @@ package com.extendedclip.papi.expansion.player;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -42,6 +43,7 @@ public final class PlayerUtil {
     public static final double ticksPerMinute = 1000d / 60d;
     private static final SimpleDateFormat twentyFour = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
     private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
+    private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
 
     private PlayerUtil() {
     }
@@ -148,39 +150,8 @@ public final class PlayerUtil {
         return (hours < 10 ? "0" + hours : hours) + ":" + (mins < 10 ? "0" + mins : mins);
     }
 
-    public static String getCardinalDirection(Player player) {
-        double rotation = player.getLocation().getYaw() - 180.0F;
-        if (rotation < 0.0D) {
-            rotation += 360.0D;
-        }
-        if ((0.0D <= rotation) && (rotation < 22.5D)) {
-            return "N";
-        }
-        if ((22.5D <= rotation) && (rotation < 67.5D)) {
-            return "NE";
-        }
-        if ((67.5D <= rotation) && (rotation < 112.5D)) {
-            return "E";
-        }
-        if ((112.5D <= rotation) && (rotation < 157.5D)) {
-            return "SE";
-        }
-        if ((157.5D <= rotation) && (rotation < 202.5D)) {
-            return "S";
-        }
-        if ((202.5D <= rotation) && (rotation < 247.5D) || (rotation <= -119.33) && (rotation > -179)) {
-            return "SW";
-        }
-        if ((247.5D <= rotation) && (rotation < 292.5D) || (rotation <= -59.66) && (rotation > -119.33)) {
-            return "W";
-        }
-        if ((292.5D <= rotation) && (rotation < 337.5D) || (rotation <= -0.0) && (rotation > -59.66)) {
-            return "NW";
-        }
-        if ((337.5D <= rotation) && (rotation < 360.0D)) {
-            return "N";
-        }
-        return "";
+    public static BlockFace getDirection(Player player) {
+        return radial[Math.round(player.getLocation().getYaw() / 45f) & 0x7].getOppositeFace();
     }
 
     public static String getXZDirection(Player player) {
