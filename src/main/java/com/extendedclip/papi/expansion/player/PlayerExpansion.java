@@ -32,7 +32,6 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.Location;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -42,8 +41,8 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getBiome;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getCapitalizedBiome;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getCardinalDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getEmptySlots;
+import static com.extendedclip.papi.expansion.player.PlayerUtil.getDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperience;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
@@ -55,6 +54,15 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
     private int mediumValue;
     private int highValue;
+
+    private String north;
+    private String northEast;
+    private String east;
+    private String southEast;
+    private String south;
+    private String southWest;
+    private String west;
+    private String northWest;
 
     @Override
     public String getIdentifier() {
@@ -79,6 +87,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         defaults.put("ping_color.low", "&a");
         defaults.put("ping_value.medium", 50);
         defaults.put("ping_value.high", 100);
+        defaults.put("direction.north", "N");
+        defaults.put("direction.north_east", "NE");
+        defaults.put("direction.east", "E");
+        defaults.put("direction.south_east", "SE");
+        defaults.put("direction.south", "S");
+        defaults.put("direction.south_west", "SW");
+        defaults.put("direction.west", "W");
+        defaults.put("direction.north_west", "NW");
         return defaults;
     }
 
@@ -214,7 +230,25 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "gamemode":
                 return p.getGameMode().name();
             case "direction":
-                return getCardinalDirection(p);
+                switch (getDirection(p)) {
+                    case NORTH:
+                        return north;
+                    case NORTH_EAST:
+                        return northEast;
+                    case EAST:
+                        return east;
+                    case SOUTH_EAST:
+                        return southEast;
+                    case SOUTH:
+                        return south;
+                    case SOUTH_WEST:
+                        return southWest;
+                    case WEST:
+                        return west;
+                    case NORTH_WEST:
+                        return northWest;
+                }
+                return "";
             case "direction_xz":
                 return getXZDirection(p);
             case "world":
@@ -401,6 +435,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         high = this.getString("ping_color.high", "&c");
         mediumValue = this.getInt("ping_value.medium", 50);
         highValue = this.getInt("ping_value.high", 100);
+        north = this.getString("direction.north", "N");
+        northEast = this.getString("direction.north_east", "NE");
+        east = this.getString("direction.east", "E");
+        southEast = this.getString("direction.south_east", "SE");
+        south = this.getString("direction.south", "S");
+        southWest = this.getString("direction.south_west", "SW");
+        west = this.getString("direction.west", "W");
+        northWest = this.getString("direction.north_west", "NW");
 
 
         return super.register();
