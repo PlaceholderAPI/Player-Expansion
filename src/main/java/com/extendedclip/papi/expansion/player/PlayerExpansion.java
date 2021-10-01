@@ -159,6 +159,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
         Player p = player.getPlayer();
 
+        // to get rid of IDE warnings
+        if (p == null) {
+            return "";
+        }
+
         if (identifier.startsWith("has_permission_")) {
             if (identifier.split("has_permission_").length > 1) {
                 String perm = identifier.split("has_permission_")[1];
@@ -218,6 +223,13 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         }
 
         switch (identifier) {
+            case "absorption": {
+                if (VersionHelper.HAS_ABSORPTION_METHODS) {
+                    return Integer.toString((int) p.getAbsorptionAmount());
+                } else {
+                    return "-1";
+                }
+            }
             case "has_empty_slot":
                 return bool(p.getInventory().firstEmpty() > -1);
             case "empty_slots":
@@ -460,26 +472,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         }
 
         return ChatColor.translateAlternateColorCodes('&', ping > highValue ? high : ping > mediumValue ? medium : low) + ping;
-    }
-
-    /**
-     * Helper method to return the major version that the server is running.
-     *
-     * This is needed because in 1.17, NMS is no longer versioned.
-     *
-     * @return the major version of Minecraft the server is running
-     */
-    public static int minecraftVersion() {
-        try {
-            final Matcher matcher = Pattern.compile("\\(MC: (\\d)\\.(\\d+)\\.?(\\d+?)?\\)").matcher(Bukkit.getVersion());
-            if (matcher.find()) {
-                return Integer.parseInt(matcher.toMatchResult().group(2), 10);
-            } else {
-                throw new IllegalArgumentException(String.format("No match found in '%s'", Bukkit.getVersion()));
-            }
-        } catch (final IllegalArgumentException ex) {
-            throw new RuntimeException("Failed to determine Minecraft version", ex);
-        }
     }
 
 }
