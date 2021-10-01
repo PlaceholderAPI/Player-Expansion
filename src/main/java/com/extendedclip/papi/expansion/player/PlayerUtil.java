@@ -45,8 +45,7 @@ public final class PlayerUtil {
     private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
     private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
 
-    private PlayerUtil() {
-    }
+    private PlayerUtil() { }
 
     private static final Function<Player, Integer> PLAYER_GET_PING = new Function<Player, Integer>() {
 
@@ -78,7 +77,7 @@ public final class PlayerUtil {
 
             final Object entityPlayer = getHandle.invoke(player);
 
-            ping = entityPlayer.getClass().getDeclaredField(PlayerExpansion.minecraftVersion() >= 17 ? "e" : "ping");
+            ping = entityPlayer.getClass().getDeclaredField(VersionHelper.IS_1_17_OR_NEWER ? "e" : "ping");
             ping.setAccessible(true);
         }
     };
