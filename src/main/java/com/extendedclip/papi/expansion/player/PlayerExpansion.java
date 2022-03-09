@@ -85,8 +85,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         defaults.put("ping_color.high", "&c");
         defaults.put("ping_color.medium", "&e");
         defaults.put("ping_color.low", "&a");
-        defaults.put("ping_value.medium", 50);
-        defaults.put("ping_value.high", 100);
+        defaults.put("ping_value.medium", 100);
+        defaults.put("ping_value.high", 150);
         defaults.put("direction.north", "N");
         defaults.put("direction.north_east", "NE");
         defaults.put("direction.east", "E");
@@ -447,8 +447,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         low = this.getString("ping_color.low", "&a");
         medium = this.getString("ping_color.medium", "&e");
         high = this.getString("ping_color.high", "&c");
-        mediumValue = this.getInt("ping_value.medium", 50);
-        highValue = this.getInt("ping_value.high", 100);
+        mediumValue = this.getInt("ping_value.medium", 100);
+        highValue = this.getInt("ping_value.high", 150);
         north = this.getString("direction.north", "N");
         northEast = this.getString("direction.north_east", "NE");
         east = this.getString("direction.east", "E");
