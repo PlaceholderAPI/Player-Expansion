@@ -32,6 +32,7 @@ import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.NamespacedKey;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -183,14 +184,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         if (identifier.startsWith("item_in_hand_level_")) {
             if (identifier.split("item_in_hand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_hand_level_")[1];
-                return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
+                return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByKey(NamespacedKey.minecraft(enchantment.toLowerCase()))));
             }
             return "0";
         }
         if (identifier.startsWith("item_in_offhand_level_")) {
             if (identifier.split("item_in_offhand_level_").length > 1) {
                 String enchantment = identifier.split("item_in_offhand_level_")[1];
-                return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
+                return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByKey(NamespacedKey.minecraft(enchantment.toLowerCase()))));
             }
             return "0";
         }
