@@ -102,10 +102,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     public String onRequest(OfflinePlayer player, String identifier) {
 
         final boolean targetedPing = identifier.startsWith("ping_");
-        if (targetedPing || identifier.startsWith("colored_ping_")) {
+        final boolean targetedColoredPing = identifier.startsWith("colored_ping_");
+        if (targetedPing || targetedColoredPing) {
             final Player target = Bukkit.getPlayer(identifier.substring(targetedPing ? 5 : 13)); // yes, I know, magic value
 
-            return target == null ? "0" : retrievePing(target, false);
+            return target == null ? "0" : retrievePing(target, targetedColoredPing);
         }
 
         if (player == null) {
