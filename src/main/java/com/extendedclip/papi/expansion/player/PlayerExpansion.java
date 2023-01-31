@@ -337,6 +337,15 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return String.valueOf(Math.round(p.getHealth()));
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
+            case "has_health_boost":
+                return bool(p.hasPotionEffect(PotionEffectType.HEALTH_BOOST));
+            case "health_boost": {
+                if (p.getHealthScale() > 20) {
+                    return Double.toString(p.getHealthScale() - 20);
+                } else {
+                    return "0";
+                }
+            }
             case "item_in_hand":
                 return String.valueOf(itemInHand(p).getType());
             case "item_in_hand_name":
