@@ -77,7 +77,16 @@ public final class PlayerUtil {
 
             final Object entityPlayer = getHandle.invoke(player);
 
-            ping = entityPlayer.getClass().getDeclaredField(VersionHelper.IS_1_17_OR_NEWER ? "e" : "ping");
+            String pingFieldName;
+            if (VersionHelper.IS_1_20_OR_NEWER) {
+                pingFieldName = "f";
+            } else if (VersionHelper.IS_1_17_OR_NEWER) {
+                pingFieldName = "e";
+            } else {
+                pingFieldName = "ping";
+            }
+
+            ping = entityPlayer.getClass().getDeclaredField(pingFieldName);
             ping.setAccessible(true);
         }
     };
