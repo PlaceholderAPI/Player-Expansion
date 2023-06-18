@@ -2,6 +2,8 @@ package com.extendedclip.papi.expansion.player;
 
 import com.google.common.primitives.Ints;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Player;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,15 +16,14 @@ public final class VersionHelper {
     private static final int VERSION = getCurrentVersion();
 
     /**
-     * <a href="https://docs.docdex.helpch.at/1.15/org/bukkit/entity/Damageable.html#getAbsorptionAmount--">
-     * Damageable#getAbsorptionAmount
-     * </a>
+     * @see Damageable#getAbsorptionAmount()
      */
     public static final boolean HAS_ABSORPTION_METHODS = VERSION >= 1_15_0;
 
+    /**
+     * @see Player#getPing()
+     */
     public static final boolean IS_1_17_OR_NEWER = VERSION >= 1_17_0;
-
-    public static final boolean IS_1_20_OR_NEWER = VERSION >= 1_20_0;
 
     private VersionHelper() { }
 
