@@ -1,5 +1,7 @@
 package com.extendedclip.papi.expansion.player;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -14,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 /*
  *
@@ -54,6 +57,12 @@ public final class PlayerUtil {
 
         @Override
         public Integer apply(final Player player) {
+            // 1.17 added Player#getPing, and we can use that directly
+            if (VersionHelper.IS_1_17_OR_NEWER) {
+                return player.getPing();
+            }
+
+            // For versions before 1.17 we need to use reflection
             if (ping == null) {
                 try {
                     cacheReflection(player);
@@ -65,7 +74,9 @@ public final class PlayerUtil {
             try {
                 return ping.getInt(getHandle.invoke(player));
             } catch (final IllegalAccessException | InvocationTargetException ex) {
-                ex.printStackTrace();
+                PlaceholderAPIPlugin.getInstance()
+                                .getLogger()
+                                .log(Level.SEVERE, "Could not get the ping of " + player.getName() + ", using -1 as fallback value", ex);
             }
             return -1;
         }
@@ -76,17 +87,7 @@ public final class PlayerUtil {
             getHandle.setAccessible(true);
 
             final Object entityPlayer = getHandle.invoke(player);
-
-            String pingFieldName;
-            if (VersionHelper.IS_1_20_OR_NEWER) {
-                pingFieldName = "f";
-            } else if (VersionHelper.IS_1_17_OR_NEWER) {
-                pingFieldName = "e";
-            } else {
-                pingFieldName = "ping";
-            }
-
-            ping = entityPlayer.getClass().getDeclaredField(pingFieldName);
+            ping = entityPlayer.getClass().getDeclaredField("ping");
             ping.setAccessible(true);
         }
     };
@@ -110,7 +111,9 @@ public final class PlayerUtil {
                 final Object entityPlayer = getHandle.invoke(player);
                 return (String) locale.get(entityPlayer);
             } catch (final IllegalAccessException | InvocationTargetException ex) {
-                ex.printStackTrace();
+                PlaceholderAPIPlugin.getInstance()
+                        .getLogger()
+                        .log(Level.SEVERE, "Could not get the locale of " + player.getName() + ", using 'en_US' as fallback value", ex);
             }
             return "en_US";
         }
