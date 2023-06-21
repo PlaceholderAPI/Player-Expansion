@@ -447,8 +447,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return bool(p.isLeashed());
             case "is_inside_vehicle":
                 return bool(p.isInsideVehicle());
-            case "potion_has": {
-                final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("potion_has_", ""));
+            case "has_potion_effect": {
+                final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("has_potion_effect_", ""));
                 return bool(potion != null && p.hasPotionEffect(potion));
             }
 
