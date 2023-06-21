@@ -447,22 +447,24 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return bool(p.isLeashed());
             case "is_inside_vehicle":
                 return bool(p.isInsideVehicle());
-            case "has_potion_effect": {
-                final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("has_potion_effect_", ""));
-                return bool(potion != null && p.hasPotionEffect(potion));
-            }
-
-            case "potion_level": {
-                final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("potion_level_", ""));
-
-                if (potion == null || !p.hasPotionEffect(potion)) {
-                    return "0";
-                }
-
-                //noinspection DataFlowIssue
-                return String.valueOf(p.getPotionEffect(potion).getAmplifier());
-            }
         }
+
+        if (identifier.startsWith("has_potion_effect_")) {
+            final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("has_potion_effect_", ""));
+            return bool(potion != null && p.hasPotionEffect(potion));
+        }
+
+        if (identifier.startsWith("potion_level_")) {
+            final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("potion_level_", ""));
+
+            if (potion == null || !p.hasPotionEffect(potion)) {
+                return "0";
+            }
+
+            //noinspection DataFlowIssue
+            return String.valueOf(p.getPotionEffect(potion).getAmplifier());
+        }
+
         // return null for unknown placeholders
         return null;
     }
