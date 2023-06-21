@@ -454,8 +454,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             return bool(potion != null && p.hasPotionEffect(potion));
         }
 
-        if (identifier.startsWith("potion_level_")) {
-            final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("potion_level_", ""));
+        if (identifier.startsWith("potion_effect_level_")) {
+            final PotionEffectType potion = PotionEffectType.getByName(identifier.replace("potion_effect_level_", ""));
 
             if (potion == null || !p.hasPotionEffect(potion)) {
                 return "0";
