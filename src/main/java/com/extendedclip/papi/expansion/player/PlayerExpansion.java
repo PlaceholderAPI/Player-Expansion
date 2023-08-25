@@ -25,6 +25,7 @@ import lombok.Getter;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -34,6 +35,7 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
@@ -45,14 +47,15 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperien
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
 
-public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
+public final class PlayerExpansion extends PlaceholderExpansion implements Taskable, Configurable {
 
     @Getter private final String identifier = "player";
     @Getter private final String author = "clip";
-    @Getter private final String version= "2.1.0";
+    @Getter private final String version = "2.1.0";
     @Getter private final Map<String, Object> defaults;
 
     private final SimpleDateFormat dateFormat = PlaceholderAPIPlugin.getDateFormat();
+    private final VersionHelper versionHelper;
 
     private String low;
     private String medium;
@@ -86,7 +89,31 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             put("direction.west", "W");
             put("direction.north_west", "NW");
         }};
+        versionHelper = new VersionHelper();
     }
+
+    @Override
+    public void start() {
+        low = getString("ping_color.low", "&a");
+        medium = getString("ping_color.medium", "&e");
+        high = getString("ping_color.high", "&c");
+        mediumValue = getInt("ping_value.medium", 50);
+        highValue = getInt("ping_value.high", 100);
+
+        north = getString("direction.north", "N");
+        northEast = getString("direction.north_east", "NE");
+        east = getString("direction.east", "E");
+        southEast = getString("direction.south_east", "SE");
+        south = getString("direction.south", "S");
+        southWest = getString("direction.south_west", "SW");
+        west = getString("direction.west", "W");
+        northWest = getString("direction.north_west", "NW");
+
+
+    }
+
+    @Override
+    public void stop() {}
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier) {
@@ -137,7 +164,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                     yield PlayerUtil.getItemEnchantment(p,identifier,identifier.startsWith("item_in_hand_level_"));
 
                 if (identifier.startsWith("locale")) {
-                    String localeStr = PlayerUtil.getLocale(p);
+                    String localeStr = versionHelper.getLocale(p);
 
                     yield switch (identifier) {
                         case "locale" -> localeStr;
@@ -158,7 +185,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 }
 
                 yield switch (identifier) {
-                    case "absorption" -> VersionHelper.HAS_ABSORPTION_METHODS ? Integer.toString((int) p.getAbsorptionAmount()) : "-1";
+                    case "absorption" -> String.valueOf(versionHelper.getAbsorption(p));
                     case "has_empty_slot" -> bool(p.getInventory().firstEmpty() > -1);
                     case "empty_slots" -> String.valueOf(getEmptySlots(p));
                     case "displayname" -> p.getDisplayName();
@@ -284,35 +311,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         };
     }
 
-    @Override
-    public boolean register() {
-        low = getString("ping_color.low", "&a");
-        medium = getString("ping_color.medium", "&e");
-        high = getString("ping_color.high", "&c");
-        mediumValue = getInt("ping_value.medium", 50);
-        highValue = getInt("ping_value.high", 100);
-        north = getString("direction.north", "N");
-        northEast = getString("direction.north_east", "NE");
-        east = getString("direction.east", "E");
-        southEast = getString("direction.south_east", "SE");
-        south = getString("direction.south", "S");
-        southWest = getString("direction.south_west", "SW");
-        west = getString("direction.west", "W");
-        northWest = getString("direction.north_west", "NW");
-
-        return super.register();
-    }
-
     public String bool(boolean b) {
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
     }
 
 
     private String retrievePing(final Player player, final boolean colored) {
-        final int ping = PlayerUtil.getPing(player);
-        if (!colored) {
-            return String.valueOf(ping);
-        }
+        final int ping = versionHelper.getPing(player);
+        if (!colored) return String.valueOf(ping);
 
         return ChatColor.translateAlternateColorCodes('&', ping > highValue ? high : ping > mediumValue ? medium : low) + ping;
     }
