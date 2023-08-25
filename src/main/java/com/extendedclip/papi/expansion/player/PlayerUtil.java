@@ -1,25 +1,3 @@
-package com.extendedclip.papi.expansion.player;
-
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.block.BlockFace;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.function.Function;
-import java.util.logging.Level;
-
 /*
  *
  * Player-Expansion
@@ -40,6 +18,23 @@ import java.util.logging.Level;
  *
  *
  */
+
+package com.extendedclip.papi.expansion.player;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public final class PlayerUtil {
 
     public static final int ticksAtMidnight = 18000;
@@ -81,51 +76,37 @@ public final class PlayerUtil {
 
     public static String getXZDirection(Player player) {
         double rotation = player.getLocation().getYaw();
-        if (rotation < 0.0D) {
-            rotation += 360.0D;
-        }
+        if (rotation < 0.0D) rotation += 360.0D;
 
-        if (Math.abs(rotation) <= 45 || Math.abs(rotation - 360) <= 45) {
-            return "+Z";
-        } else if (Math.abs(rotation - 90) <= 45) {
-            return "-X";
-        } else if (Math.abs(rotation - 180) <= 45) {
-            return "-Z";
-        } else if (Math.abs(rotation - 270) <= 45) {
-            return "+X";
-        }
-
+        if (Math.abs(rotation) <= 45 || Math.abs(rotation - 360) <= 45)  return "+Z";
+        if (Math.abs(rotation - 90) <= 45) return "-X";
+        if (Math.abs(rotation - 180) <= 45) return "-Z";
+        if (Math.abs(rotation - 270) <= 45) return "+X";
         return "";
     }
 
     @SuppressWarnings("deprecation")
     public static ItemStack itemInHand(Player p) {
-        try {
-            return p.getInventory().getItemInMainHand();
-        } catch (NoSuchMethodError e) {
-            return p.getInventory().getItemInHand();
-        }
+        try {return p.getInventory().getItemInMainHand();}
+        catch (NoSuchMethodError e) {return p.getInventory().getItemInHand();}
     }
 
     @SuppressWarnings("deprecation")
     public static int durability(ItemStack item) {
-        return item != null ? item.getType().getMaxDurability() - item.getDurability() : 0;
+        return item == null ? 0 : item.getType().getMaxDurability() - item.getDurability();
     }
 
     public static int getEmptySlots(Player p) {
         int slots = 0;
         PlayerInventory inv = p.getInventory();
-        for (ItemStack is : inv.getContents()) {
+        for (ItemStack is : inv.getStorageContents())
             if (is == null) slots++;
-        }
 
-        if (!Bukkit.getBukkitVersion().contains("1.7") && !Bukkit.getBukkitVersion().contains("1.8")) {
-            if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
-            if (inv.getHelmet() == null) slots--;
-            if (inv.getChestplate() == null) slots--;
-            if (inv.getLeggings() == null) slots--;
-            if (inv.getBoots() == null) slots--;
-        }
+        if (Bukkit.getServer().getBukkitVersion().contains("1.7") || Bukkit.getServer().getBukkitVersion().contains("1.8"))
+            return slots;
+
+        if (inv.getItemInOffHand() == null || inv.getItemInOffHand().getType() == Material.AIR) slots--;
+
         return slots;
     }
 
@@ -144,10 +125,7 @@ public final class PlayerUtil {
             currentLevel--;
             experience += getExperienceAtLevel(currentLevel);
         }
-        if (experience < 0) {
-            experience = 0;
-        }
-        return experience;
+        return Math.max(experience, 0);
     }
 
     public static String getBiome(Player p) {
@@ -180,7 +158,6 @@ public final class PlayerUtil {
         if (enchant == null) return "0";
         ItemStack item = mainhand ? itemInHand(player) : player.getInventory().getItemInOffHand();
         return String.valueOf(item.getEnchantmentLevel(enchant));
-
     }
 
 }
