@@ -1,6 +1,5 @@
 package com.extendedclip.papi.expansion.player;
 
-import com.google.common.primitives.Ints;
 import org.bukkit.Bukkit;
 
 import java.util.regex.Matcher;
@@ -22,7 +21,7 @@ public final class VersionHelper {
 
     public static final boolean IS_1_17_OR_NEWER = VERSION >= 1_17_0;
 
-    private VersionHelper() { }
+    private VersionHelper() {}
 
     /**
      * Gets the current server version
@@ -42,14 +41,11 @@ public final class VersionHelper {
                     .append((patch == null) ? "0" : patch.replace(".", ""));
         }
 
-        final Integer version = Ints.tryParse(stringBuilder.toString());
-
-        // Should never fail
-        if (version == null) {
+        try {
+            return Integer.parseInt(stringBuilder.toString());
+        } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Could not retrieve server version!");
         }
-
-        return version;
     }
 
 }

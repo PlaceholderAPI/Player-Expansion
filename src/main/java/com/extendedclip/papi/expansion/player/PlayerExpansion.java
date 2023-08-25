@@ -29,11 +29,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
@@ -52,6 +51,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     @Getter private final String author = "clip";
     @Getter private final String version= "2.1.0";
     @Getter private final Map<String, Object> defaults;
+
+    private final SimpleDateFormat dateFormat = PlaceholderAPIPlugin.getDateFormat();
 
     private String low;
     private String medium;
@@ -98,365 +99,206 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             return target == null ? "0" : retrievePing(target, targetedColoredPing);
         }
 
-        if (player == null) {
-            return "";
-        }
+        if (player == null) return "";
 
         // offline placeholders
-        switch (identifier) {
-            case "name":
-                return player.getName();
-            case "uuid":
-                return player.getUniqueId().toString();
-            case "has_played_before":
-                return bool(player.hasPlayedBefore());
-            case "online":
-                return bool(player.isOnline());
-            case "is_whitelisted":
-                return bool(player.isWhitelisted());
-            case "is_banned":
-                return bool(player.isBanned());
-            case "is_op":
-                return bool(player.isOp());
-            case "first_played":
-            case "first_join":
-                return String.valueOf(player.getFirstPlayed());
-            case "first_played_formatted":
-            case "first_join_date":
-                return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getFirstPlayed()));
-            case "last_played":
-            case "last_join":
-                return String.valueOf(player.getLastPlayed());
-            case "last_played_formatted":
-            case "last_join_date":
-                return PlaceholderAPIPlugin.getDateFormat().format(new Date(player.getLastPlayed()));
-            case "bed_x":
-                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getX()) : "";
-            case "bed_y":
-                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getY()) : "";
-            case "bed_z":
-                return player.getBedSpawnLocation() != null ? String.valueOf(player.getBedSpawnLocation().getZ()) : "";
-            case "bed_world":
-                return player.getBedSpawnLocation() != null ? player.getBedSpawnLocation().getWorld()
-                        .getName() : "";
+        return switch (identifier) {
+            case "name" -> player.getName();
+            case "uuid" -> player.getUniqueId().toString();
+            case "has_played_before" -> bool(player.hasPlayedBefore());
+            case "online" -> bool(player.isOnline());
+            case "is_whitelisted" -> bool(player.isWhitelisted());
+            case "is_banned" -> bool(player.isBanned());
+            case "is_op" -> bool(player.isOp());
+            case "first_played", "first_join" -> String.valueOf(player.getFirstPlayed());
+            case "first_played_formatted", "first_join_date" -> dateFormat.format(new Date(player.getFirstPlayed()));
+            case "last_played", "last_join" -> String.valueOf(player.getLastPlayed());
+            case "last_played_formatted", "last_join_date" -> dateFormat.format(new Date(player.getLastPlayed()));
+            case "bed_x", "bed_y", "bed_z", "bed_world" -> PlayerUtil.getBedLocation(player,identifier.substring(4));
+            default -> {
+                // online placeholders
+                if (!player.isOnline()) yield "";
 
-        }
+                Player p = player.getPlayer();
 
-        // online placeholders
-        if (!player.isOnline()) {
-            return "";
-        }
+                // to get rid of IDE warnings
+                if (p == null) yield "";
 
-        Player p = player.getPlayer();
+                if (identifier.startsWith("has_permission_"))
+                    yield bool(p.hasPermission(identifier.substring(15)));
 
-        // to get rid of IDE warnings
-        if (p == null) {
-            return "";
-        }
-
-        if (identifier.startsWith("has_permission_")) {
-            if (identifier.split("has_permission_").length > 1) {
-                String perm = identifier.split("has_permission_")[1];
-                return bool(p.hasPermission(perm));
-            }
-            return bool(false);
-        }
-
-        if (identifier.startsWith("has_potioneffect_")) {
-            if (identifier.split("has_potioneffect_").length > 1) {
-                String effect = identifier.split("has_potioneffect_")[1];
-                PotionEffectType potion = PotionEffectType.getByName(effect);
-                return bool(p.hasPotionEffect(potion));
-            }
-        }
-
-        if (identifier.startsWith("item_in_hand_level_")) {
-            if (identifier.split("item_in_hand_level_").length > 1) {
-                String enchantment = identifier.split("item_in_hand_level_")[1];
-                return String.valueOf(itemInHand(p).getEnchantmentLevel(Enchantment.getByName(enchantment)));
-            }
-            return "0";
-        }
-        if (identifier.startsWith("item_in_offhand_level_")) {
-            if (identifier.split("item_in_offhand_level_").length > 1) {
-                String enchantment = identifier.split("item_in_offhand_level_")[1];
-                return String.valueOf(p.getInventory().getItemInOffHand().getEnchantmentLevel(Enchantment.getByName(enchantment)));
-            }
-            return "0";
-        }
-
-        if (identifier.startsWith("locale")) {
-            String localeStr = PlayerUtil.getLocale(p);
-            String localeStrISO = localeStr.replace("_", "-");
-
-            switch (identifier) {
-                case "locale":
-                    return localeStr;
-                case "locale_country":
-                    Locale locale = Locale.forLanguageTag(localeStrISO);
-                    if (locale == null)
-                        return "";
-                    return locale.getCountry();
-                case "locale_display_country":
-                    locale = Locale.forLanguageTag(localeStrISO);
-                    if (locale == null)
-                        return "";
-                    return locale.getDisplayCountry();
-                case "locale_display_name":
-                    locale = Locale.forLanguageTag(localeStrISO);
-                    if (locale == null)
-                        return "";
-                    return locale.getDisplayName();
-                case "locale_short":
-                    return localeStr.substring(0, localeStr.indexOf("_"));
-            }
-        }
-
-        switch (identifier) {
-            case "absorption": {
-                if (VersionHelper.HAS_ABSORPTION_METHODS) {
-                    return Integer.toString((int) p.getAbsorptionAmount());
-                } else {
-                    return "-1";
+                if (identifier.startsWith("has_potioneffect_")) {
+                    String effect = identifier.substring(17);
+                    PotionEffectType potion = PotionEffectType.getByName(effect);
+                    yield bool(potion != null && p.hasPotionEffect(potion));
                 }
+
+                if (identifier.startsWith("item_in_hand_level_") || identifier.startsWith("item_in_offhand_level_"))
+                    yield PlayerUtil.getItemEnchantment(p,identifier,identifier.startsWith("item_in_hand_level_"));
+
+                if (identifier.startsWith("locale")) {
+                    String localeStr = PlayerUtil.getLocale(p);
+
+                    yield switch (identifier) {
+                        case "locale" -> localeStr;
+                        case "locale_short" -> localeStr.substring(0, localeStr.indexOf("_"));
+                        case "locale_country", "locale_display_country", "locale_display_name" -> {
+                            String localeStrISO = localeStr.replace("_", "-");
+                            Locale locale = Locale.forLanguageTag(localeStrISO);
+                            if (locale == null) yield "";
+                            yield switch (identifier) {
+                                case "locale_country" -> locale.getCountry();
+                                case "locale_display_country" -> locale.getDisplayCountry();
+                                case "locale_display_name" -> locale.getDisplayName();
+                                default -> null;
+                            };
+                        }
+                        default -> null;
+                    };
+                }
+
+                yield switch (identifier) {
+                    case "absorption" -> VersionHelper.HAS_ABSORPTION_METHODS ? Integer.toString((int) p.getAbsorptionAmount()) : "-1";
+                    case "has_empty_slot" -> bool(p.getInventory().firstEmpty() > -1);
+                    case "empty_slots" -> String.valueOf(getEmptySlots(p));
+                    case "displayname" -> p.getDisplayName();
+                    case "list_name" -> p.getPlayerListName();
+                    case "gamemode" -> p.getGameMode().name();
+                    case "direction" -> switch (getDirection(p)) {
+                            case NORTH -> north;
+                            case NORTH_EAST -> northEast;
+                            case EAST -> east;
+                            case SOUTH_EAST -> southEast;
+                            case SOUTH -> south;
+                            case SOUTH_WEST -> southWest;
+                            case WEST -> west;
+                            case NORTH_WEST -> northWest;
+                            default -> "";
+                    };
+                    case "direction_xz" -> getXZDirection(p);
+                    case "world" -> p.getWorld().getName();
+                    case "world_type" -> switch (p.getWorld().getEnvironment()) {
+                        case NETHER -> "Nether";
+                        case THE_END -> "The End";
+                        case NORMAL -> "Overworld";
+                        case CUSTOM -> "Custom";
+                    };
+                    case "x" -> String.valueOf(p.getLocation().getBlockX());
+                    case "x_long" -> String.valueOf(p.getLocation().getX());
+                    case "y" -> String.valueOf(p.getLocation().getBlockY());
+                    case "y_long" -> String.valueOf(p.getLocation().getY());
+                    case "z" -> String.valueOf(p.getLocation().getBlockZ());
+                    case "z_long" -> String.valueOf(p.getLocation().getZ());
+                    case "yaw" -> String.valueOf(p.getLocation().getYaw());
+                    case "pitch" -> String.valueOf(p.getLocation().getPitch());
+                    case "biome" -> getBiome(p);
+                    case "biome_capitalized" -> getCapitalizedBiome(p);
+                    case "light_level" -> String.valueOf(p.getLocation().getBlock().getLightLevel());
+                    case "ip" -> p.getAddress().getAddress().getHostAddress();
+                    case "allow_flight" -> bool(p.getAllowFlight());
+                    case "can_pickup_items" -> bool(p.getCanPickupItems());
+                    case "compass_x" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockX()) : "";
+                    case "compass_y" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockY()) : "";
+                    case "compass_z" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockZ()) : "";
+                    case "compass_world" -> p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
+                    case "block_underneath" -> String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
+                    case "custom_name" -> p.getCustomName() != null ? p.getCustomName() : p.getName();
+                    case "exp" -> String.valueOf(p.getExp());
+                    case "current_exp" -> String.valueOf(getTotalExperience(p));
+                    case "total_exp" -> String.valueOf(p.getTotalExperience());
+                    case "exp_to_level" -> String.valueOf(p.getExpToLevel());
+                    case "level" -> String.valueOf(p.getLevel());
+                    case "fly_speed" -> String.valueOf(p.getFlySpeed());
+                    case "food_level" -> String.valueOf(p.getFoodLevel());
+                    case "health" -> String.valueOf(p.getHealth());
+                    case "health_rounded" -> String.valueOf(Math.round(p.getHealth()));
+                    case "health_scale" -> String.valueOf(p.getHealthScale());
+                    case "has_health_boost" -> bool(p.hasPotionEffect(PotionEffectType.HEALTH_BOOST));
+                    case "health_boost" -> p.getHealthScale() > 20 ? Double.toString(p.getHealthScale() - 20) : "0";
+                    case "item_in_hand" -> String.valueOf(itemInHand(p).getType());
+                    case "item_in_hand_name" ->
+                            itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
+                    case "item_in_hand_data" ->
+                            itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
+                    case "item_in_hand_durability" -> String.valueOf(durability(itemInHand(p)));
+                    case "item_in_offhand" -> String.valueOf(p.getInventory().getItemInOffHand().getType());
+                    case "item_in_offhand_name" ->
+                            p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
+                    case "item_in_offhand_data" ->
+                            p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
+                    case "item_in_offhand_durability" ->
+                            String.valueOf(durability(p.getInventory().getItemInOffHand()));
+                    case "last_damage" -> String.valueOf(p.getLastDamage());
+                    case "max_health" -> String.valueOf(p.getMaxHealth());
+                    case "max_health_rounded" -> String.valueOf(Math.round(p.getMaxHealth()));
+                    case "max_air" -> String.valueOf(p.getMaximumAir());
+                    case "max_no_damage_ticks" -> String.valueOf(p.getMaximumNoDamageTicks());
+                    case "no_damage_ticks" -> String.valueOf(p.getNoDamageTicks());
+                    case "armor_helmet_name" ->
+                            Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                    case "armor_helmet_data" ->
+                            p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
+                    case "armor_helmet_durability" -> String.valueOf(durability(p.getInventory().getHelmet()));
+                    case "armor_chestplate_name" ->
+                            Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                    case "armor_chestplate_data" ->
+                            p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
+                    case "armor_chestplate_durability" -> String.valueOf(durability(p.getInventory().getChestplate()));
+                    case "armor_leggings_name" ->
+                            Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                    case "armor_leggings_data" ->
+                            p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
+                    case "armor_leggings_durability" -> String.valueOf(durability(p.getInventory().getLeggings()));
+                    case "armor_boots_name" ->
+                            Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
+                    case "armor_boots_data" ->
+                            p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
+                    case "armor_boots_durability" -> String.valueOf(durability(p.getInventory().getBoots()));
+                    case "ping" -> retrievePing(p, false);
+                    case "colored_ping" -> retrievePing(p, true);
+                    case "time" -> String.valueOf(p.getPlayerTime());
+                    case "time_offset" -> String.valueOf(p.getPlayerTimeOffset());
+                    case "remaining_air" -> String.valueOf(p.getRemainingAir());
+                    case "saturation" -> String.valueOf(p.getSaturation());
+                    case "sleep_ticks" -> String.valueOf(p.getSleepTicks());
+                    case "thunder_duration" -> String.valueOf(p.getWorld().getThunderDuration());
+                    case "ticks_lived" -> String.valueOf(p.getTicksLived());
+                    case "seconds_lived" -> String.valueOf(p.getTicksLived() / 20);
+                    case "minutes_lived" -> String.valueOf((p.getTicksLived() / 20) / 60);
+                    case "walk_speed" -> String.valueOf(p.getWalkSpeed());
+                    case "weather_duration" -> String.valueOf(p.getWorld().getWeatherDuration());
+                    case "world_time" -> String.valueOf(p.getWorld().getTime());
+                    case "world_time_12" -> format12(p.getWorld().getTime());
+                    case "world_time_24" -> format24(p.getWorld().getTime());
+                    case "is_flying" -> bool(p.isFlying());
+                    case "is_sleeping" -> bool(p.isSleeping());
+                    case "is_conversing" -> bool(p.isConversing());
+                    case "is_dead" -> bool(p.isDead());
+                    case "is_sneaking" -> bool(p.isSneaking());
+                    case "is_sprinting" -> bool(p.isSprinting());
+                    case "is_leashed" -> bool(p.isLeashed());
+                    case "is_inside_vehicle" -> bool(p.isInsideVehicle());
+                    default -> null;
+                };
             }
-            case "has_empty_slot":
-                return bool(p.getInventory().firstEmpty() > -1);
-            case "empty_slots":
-                return String.valueOf(getEmptySlots(p));
-            case "server":
-            case "servername":
-                return "now available in the server expansion";
-            case "displayname":
-                return p.getDisplayName();
-            case "list_name":
-                return p.getPlayerListName();
-            case "gamemode":
-                return p.getGameMode().name();
-            case "direction":
-                switch (getDirection(p)) {
-                    case NORTH:
-                        return north;
-                    case NORTH_EAST:
-                        return northEast;
-                    case EAST:
-                        return east;
-                    case SOUTH_EAST:
-                        return southEast;
-                    case SOUTH:
-                        return south;
-                    case SOUTH_WEST:
-                        return southWest;
-                    case WEST:
-                        return west;
-                    case NORTH_WEST:
-                        return northWest;
-                }
-                return "";
-            case "direction_xz":
-                return getXZDirection(p);
-            case "world":
-                return p.getWorld().getName();
-            case "world_type":
-                World.Environment environment = p.getWorld().getEnvironment();
-                if (environment == World.Environment.NETHER) {
-                    return "Nether";
-                } else if (environment == World.Environment.THE_END) {
-                    return "The End";
-                } else if (environment == World.Environment.NORMAL) {
-                    return "Overworld";
-                }
-                return "";
-            case "x":
-                return String.valueOf(p.getLocation().getBlockX());
-            case "x_long":
-                return String.valueOf(p.getLocation().getX());
-            case "y":
-                return String.valueOf(p.getLocation().getBlockY());
-            case "y_long":
-                return String.valueOf(p.getLocation().getY());
-            case "z":
-                return String.valueOf(p.getLocation().getBlockZ());
-            case "z_long":
-                return String.valueOf(p.getLocation().getZ());
-            case "yaw":
-                return String.valueOf(p.getLocation().getYaw());
-            case "pitch":
-                return String.valueOf(p.getLocation().getPitch());
-            case "biome":
-                return getBiome(p);
-            case "biome_capitalized":
-                return getCapitalizedBiome(p);
-            case "light_level":
-                return String.valueOf(p.getLocation().getBlock().getLightLevel());
-            case "ip":
-                return p.getAddress().getAddress().getHostAddress();
-            case "allow_flight":
-                return bool(p.getAllowFlight());
-            case "can_pickup_items":
-                return bool(p.getCanPickupItems());
-            case "compass_x":
-                return p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockX()) : "";
-            case "compass_y":
-                return p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockY()) : "";
-            case "compass_z":
-                return p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockZ()) : "";
-            case "compass_world":
-                return p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
-            case "block_underneath":
-                return String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
-            case "custom_name":
-                return p.getCustomName() != null ? p.getCustomName() : p.getName();
-            case "exp":
-                return String.valueOf(p.getExp());
-            case "current_exp":
-                return String.valueOf(getTotalExperience(p));
-            case "total_exp":
-                return String.valueOf(p.getTotalExperience());
-            case "exp_to_level":
-                return String.valueOf(p.getExpToLevel());
-            case "level":
-                return String.valueOf(p.getLevel());
-            case "fly_speed":
-                return String.valueOf(p.getFlySpeed());
-            case "food_level":
-                return String.valueOf(p.getFoodLevel());
-            case "health":
-                return String.valueOf(p.getHealth());
-            case "health_rounded":
-                return String.valueOf(Math.round(p.getHealth()));
-            case "health_scale":
-                return String.valueOf(p.getHealthScale());
-            case "has_health_boost":
-                return bool(p.hasPotionEffect(PotionEffectType.HEALTH_BOOST));
-            case "health_boost": {
-                if (p.getHealthScale() > 20) {
-                    return Double.toString(p.getHealthScale() - 20);
-                } else {
-                    return "0";
-                }
-            }
-            case "item_in_hand":
-                return String.valueOf(itemInHand(p).getType());
-            case "item_in_hand_name":
-                return itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
-            case "item_in_hand_data":
-                return itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
-            case "item_in_hand_durability":
-                return String.valueOf(durability(itemInHand(p)));
-            case "item_in_offhand":
-                return String.valueOf(p.getInventory().getItemInOffHand().getType());
-            case "item_in_offhand_name":
-                return p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
-            case "item_in_offhand_data":
-                return p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
-            case "item_in_offhand_durability":
-                return String.valueOf(durability(p.getInventory().getItemInOffHand()));
-            case "last_damage":
-                return String.valueOf(p.getLastDamage());
-            case "max_health":
-                return String.valueOf(p.getMaxHealth());
-            case "max_health_rounded":
-                return String.valueOf(Math.round(p.getMaxHealth()));
-            case "max_air":
-                return String.valueOf(p.getMaximumAir());
-            case "max_no_damage_ticks":
-                return String.valueOf(p.getMaximumNoDamageTicks());
-            case "no_damage_ticks":
-                return String.valueOf(p.getNoDamageTicks());
-            case "armor_helmet_name":
-                return Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-            case "armor_helmet_data":
-                return p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
-            case "armor_helmet_durability":
-                return String.valueOf(durability(p.getInventory().getHelmet()));
-            case "armor_chestplate_name":
-                return Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-            case "armor_chestplate_data":
-                return p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
-            case "armor_chestplate_durability":
-                return String.valueOf(durability(p.getInventory().getChestplate()));
-            case "armor_leggings_name":
-                return Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-            case "armor_leggings_data":
-                return p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
-            case "armor_leggings_durability":
-                return String.valueOf(durability(p.getInventory().getLeggings()));
-            case "armor_boots_name":
-                return Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-            case "armor_boots_data":
-                return p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
-            case "armor_boots_durability":
-                return String.valueOf(durability(p.getInventory().getBoots()));
-            case "ping":
-                return retrievePing(p, false);
-            case "colored_ping":
-                return retrievePing(p, true);
-            case "time":
-                return String.valueOf(p.getPlayerTime());
-            case "time_offset":
-                return String.valueOf(p.getPlayerTimeOffset());
-            case "remaining_air":
-                return String.valueOf(p.getRemainingAir());
-            case "saturation":
-                return String.valueOf(p.getSaturation());
-            case "sleep_ticks":
-                return String.valueOf(p.getSleepTicks());
-            case "thunder_duration":
-                return String.valueOf(p.getWorld().getThunderDuration());
-            case "ticks_lived":
-                return String.valueOf(p.getTicksLived());
-            case "seconds_lived":
-                return String.valueOf(p.getTicksLived() / 20);
-            case "minutes_lived":
-                return String.valueOf((p.getTicksLived() / 20) / 60);
-            case "walk_speed":
-                return String.valueOf(p.getWalkSpeed());
-            case "weather_duration":
-                return String.valueOf(p.getWorld().getWeatherDuration());
-            case "world_time":
-                return String.valueOf(p.getWorld().getTime());
-            case "world_time_12":
-                return format12(p.getWorld().getTime());
-            case "world_time_24":
-                return format24(p.getWorld().getTime());
-            case "is_flying":
-                return bool(p.isFlying());
-            case "is_sleeping":
-                return bool(p.isSleeping());
-            case "is_conversing":
-                return bool(p.isConversing());
-            case "is_dead":
-                return bool(p.isDead());
-            case "is_sneaking":
-                return bool(p.isSneaking());
-            case "is_sprinting":
-                return bool(p.isSprinting());
-            case "is_leashed":
-                return bool(p.isLeashed());
-            case "is_inside_vehicle":
-                return bool(p.isInsideVehicle());
-        }
-        // return null for unknown placeholders
-        return null;
+        };
     }
 
     @Override
     public boolean register() {
-        low = this.getString("ping_color.low", "&a");
-        medium = this.getString("ping_color.medium", "&e");
-        high = this.getString("ping_color.high", "&c");
-        mediumValue = this.getInt("ping_value.medium", 50);
-        highValue = this.getInt("ping_value.high", 100);
-        north = this.getString("direction.north", "N");
-        northEast = this.getString("direction.north_east", "NE");
-        east = this.getString("direction.east", "E");
-        southEast = this.getString("direction.south_east", "SE");
-        south = this.getString("direction.south", "S");
-        southWest = this.getString("direction.south_west", "SW");
-        west = this.getString("direction.west", "W");
-        northWest = this.getString("direction.north_west", "NW");
-
+        low = getString("ping_color.low", "&a");
+        medium = getString("ping_color.medium", "&e");
+        high = getString("ping_color.high", "&c");
+        mediumValue = getInt("ping_value.medium", 50);
+        highValue = getInt("ping_value.high", 100);
+        north = getString("direction.north", "N");
+        northEast = getString("direction.north_east", "NE");
+        east = getString("direction.east", "E");
+        southEast = getString("direction.south_east", "SE");
+        south = getString("direction.south", "S");
+        southWest = getString("direction.south_west", "SW");
+        west = getString("direction.west", "W");
+        northWest = getString("direction.north_west", "NW");
 
         return super.register();
     }

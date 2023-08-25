@@ -2,8 +2,11 @@ package com.extendedclip.papi.expansion.player;
 
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.BlockFace;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -47,7 +50,7 @@ public final class PlayerUtil {
     private static final SimpleDateFormat twelve = new SimpleDateFormat("h:mm aa", Locale.ENGLISH);
     private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
 
-    private PlayerUtil() { }
+    private PlayerUtil() {}
 
     private static final Function<Player, Integer> PLAYER_GET_PING = new Function<>() {
 
@@ -215,13 +218,11 @@ public final class PlayerUtil {
     }
 
     private static int getExperienceAtLevel(int level) {
-        if (level <= 15) {
-            return (level << 1) + 7;
-        }
-        if (level <= 30) {
-            return (level * 5) - 38;
-        }
-        return (level * 9) - 158;
+        return level <= 15
+                ? (level << 1) + 7
+                : level <= 30
+                    ? (level * 5) - 38
+                    : (level * 9) - 158;
     }
 
     public static int getTotalExperience(Player player) {
@@ -248,4 +249,26 @@ public final class PlayerUtil {
         }
         return String.join(" ", biomeWords);
     }
+
+    public static String getBedLocation(OfflinePlayer player, String pos) {
+        Location location = player.getBedSpawnLocation();
+        if (location == null) return "";
+        Object output = switch (pos) {
+            case "x" -> location.getX();
+            case "y" -> location.getY();
+            case "z" -> location.getZ();
+            case "world" -> location.getWorld() == null ? "" : location.getWorld().getName();
+            default -> "";
+        };
+        return String.valueOf(output);
+    }
+    public static String getItemEnchantment(Player player, String identifier, boolean mainhand) {
+        String enchantment = identifier.substring(mainhand ? 19 : 22);
+        Enchantment enchant = Enchantment.getByName(enchantment);
+        if (enchant == null) return "0";
+        ItemStack item = mainhand ? itemInHand(player) : player.getInventory().getItemInOffHand();
+        return String.valueOf(item.getEnchantmentLevel(enchant));
+
+    }
+
 }
