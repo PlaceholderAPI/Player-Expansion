@@ -71,10 +71,12 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     public PlayerExpansion() {
         defaults = new HashMap<>() {{
-            put("ping.-1", "&c");
-            put("ping.0-50", "&a");
-            put("ping.50-100", "&e");
-            put("ping.100-", "&c");
+            put("ping",new HashMap<>() {{
+                put("-1", "&c");
+                put("0-50", "&a");
+                put("50-100", "&e");
+                put("100-", "&c");
+            }});
 
             put("direction.north", "N");
             put("direction.north_east", "NE");
@@ -101,8 +103,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
         southWest = getString("direction.south_west", "SW");
         west = getString("direction.west", "W");
         northWest = getString("direction.north_west", "NW");
-
-
     }
 
     @Override
@@ -131,6 +131,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
             case "first_played", "first_join" -> String.valueOf(player.getFirstPlayed());
             case "first_played_formatted", "first_join_date" -> dateFormat.format(new Date(player.getFirstPlayed()));
             case "last_played", "last_join" -> String.valueOf(player.getLastPlayed());
+            case "time_since_last_played", "time_since_last_join" -> String.valueOf(System.currentTimeMillis()-player.getLastPlayed());
             case "last_played_formatted", "last_join_date" -> dateFormat.format(new Date(player.getLastPlayed()));
             case "bed_x", "bed_y", "bed_z", "bed_world" -> PlayerUtil.getBedLocation(player,identifier.substring(4));
             default -> {
@@ -329,7 +330,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
         if (!colored) return pingStr;
 
         for (String range : pingColors.keySet()) {
-            if (range.contains("-")) {
+            if (range.contains("-") && !range.startsWith("-")) {
                 String[] bounds = range.split("-");
                 int bound1 = Integer.parseInt(bounds[0]);
                 if (bounds.length == 1 && ping < bound1) continue;
