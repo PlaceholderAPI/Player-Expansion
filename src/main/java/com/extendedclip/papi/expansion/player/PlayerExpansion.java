@@ -30,6 +30,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
@@ -57,12 +58,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
     private final SimpleDateFormat dateFormat = PlaceholderAPIPlugin.getDateFormat();
     private final VersionHelper versionHelper;
 
-    private String low;
-    private String medium;
-    private String high;
-
-    private int mediumValue;
-    private int highValue;
+    private final Map<String,String> pingColors = new HashMap<>();
 
     private String north;
     private String northEast;
@@ -75,11 +71,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     public PlayerExpansion() {
         defaults = new HashMap<>() {{
-            put("ping_color.high", "&c");
-            put("ping_color.medium", "&e");
-            put("ping_color.low", "&a");
-            put("ping_value.medium", 50);
-            put("ping_value.high", 100);
+            put("ping.-1", "&c");
+            put("ping.0-50", "&a");
+            put("ping.50-100", "&e");
+            put("ping.100-", "&c");
+
             put("direction.north", "N");
             put("direction.north_east", "NE");
             put("direction.east", "E");
@@ -94,11 +90,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     @Override
     public void start() {
-        low = getString("ping_color.low", "&a");
-        medium = getString("ping_color.medium", "&e");
-        high = getString("ping_color.high", "&c");
-        mediumValue = getInt("ping_value.medium", 50);
-        highValue = getInt("ping_value.high", 100);
+        ConfigurationSection ping = getConfigSection("ping");
+        if (ping != null) ping.getValues(false).forEach((range,color)->pingColors.put(range,String.valueOf(color)));
 
         north = getString("direction.north", "N");
         northEast = getString("direction.north_east", "NE");
@@ -118,11 +111,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
     @Override
     public String onRequest(OfflinePlayer player, String identifier) {
 
-        final boolean targetedPing = identifier.startsWith("ping_");
         final boolean targetedColoredPing = identifier.startsWith("colored_ping_");
-        if (targetedPing || targetedColoredPing) {
-            final Player target = Bukkit.getPlayer(identifier.substring(targetedPing ? 5 : 13)); // yes, I know, magic value
-
+        if (identifier.startsWith("ping_") || targetedColoredPing) {
+            final Player target = Bukkit.getServer().getPlayer(identifier.substring(targetedColoredPing ? 13 : 5));
             return target == null ? "0" : retrievePing(target, targetedColoredPing);
         }
 
@@ -191,6 +182,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "displayname" -> p.getDisplayName();
                     case "list_name" -> p.getPlayerListName();
                     case "gamemode" -> p.getGameMode().name();
+
                     case "direction" -> switch (getDirection(p)) {
                             case NORTH -> north;
                             case NORTH_EAST -> northEast;
@@ -203,6 +195,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                             default -> "";
                     };
                     case "direction_xz" -> getXZDirection(p);
+
                     case "world" -> p.getWorld().getName();
                     case "world_type" -> switch (p.getWorld().getEnvironment()) {
                         case NETHER -> "Nether";
@@ -218,30 +211,38 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "z_long" -> String.valueOf(p.getLocation().getZ());
                     case "yaw" -> String.valueOf(p.getLocation().getYaw());
                     case "pitch" -> String.valueOf(p.getLocation().getPitch());
+
                     case "biome" -> getBiome(p);
                     case "biome_capitalized" -> getCapitalizedBiome(p);
+
                     case "light_level" -> String.valueOf(p.getLocation().getBlock().getLightLevel());
                     case "ip" -> p.getAddress().getAddress().getHostAddress();
                     case "allow_flight" -> bool(p.getAllowFlight());
                     case "can_pickup_items" -> bool(p.getCanPickupItems());
+
                     case "compass_x" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockX()) : "";
                     case "compass_y" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockY()) : "";
                     case "compass_z" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockZ()) : "";
                     case "compass_world" -> p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
+
                     case "block_underneath" -> String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
                     case "custom_name" -> p.getCustomName() != null ? p.getCustomName() : p.getName();
+
                     case "exp" -> String.valueOf(p.getExp());
                     case "current_exp" -> String.valueOf(getTotalExperience(p));
                     case "total_exp" -> String.valueOf(p.getTotalExperience());
                     case "exp_to_level" -> String.valueOf(p.getExpToLevel());
                     case "level" -> String.valueOf(p.getLevel());
+
                     case "fly_speed" -> String.valueOf(p.getFlySpeed());
                     case "food_level" -> String.valueOf(p.getFoodLevel());
+
                     case "health" -> String.valueOf(p.getHealth());
                     case "health_rounded" -> String.valueOf(Math.round(p.getHealth()));
                     case "health_scale" -> String.valueOf(p.getHealthScale());
                     case "has_health_boost" -> bool(p.hasPotionEffect(PotionEffectType.HEALTH_BOOST));
                     case "health_boost" -> p.getHealthScale() > 20 ? Double.toString(p.getHealthScale() - 20) : "0";
+
                     case "item_in_hand" -> String.valueOf(itemInHand(p).getType());
                     case "item_in_hand_name" ->
                             itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
@@ -255,12 +256,14 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                             p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
                     case "item_in_offhand_durability" ->
                             String.valueOf(durability(p.getInventory().getItemInOffHand()));
+
                     case "last_damage" -> String.valueOf(p.getLastDamage());
                     case "max_health" -> String.valueOf(p.getMaxHealth());
                     case "max_health_rounded" -> String.valueOf(Math.round(p.getMaxHealth()));
                     case "max_air" -> String.valueOf(p.getMaximumAir());
                     case "max_no_damage_ticks" -> String.valueOf(p.getMaximumNoDamageTicks());
                     case "no_damage_ticks" -> String.valueOf(p.getNoDamageTicks());
+
                     case "armor_helmet_name" ->
                             Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
                     case "armor_helmet_data" ->
@@ -281,10 +284,13 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "armor_boots_data" ->
                             p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
                     case "armor_boots_durability" -> String.valueOf(durability(p.getInventory().getBoots()));
+
                     case "ping" -> retrievePing(p, false);
                     case "colored_ping" -> retrievePing(p, true);
+
                     case "time" -> String.valueOf(p.getPlayerTime());
                     case "time_offset" -> String.valueOf(p.getPlayerTimeOffset());
+
                     case "remaining_air" -> String.valueOf(p.getRemainingAir());
                     case "saturation" -> String.valueOf(p.getSaturation());
                     case "sleep_ticks" -> String.valueOf(p.getSleepTicks());
@@ -294,9 +300,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "minutes_lived" -> String.valueOf((p.getTicksLived() / 20) / 60);
                     case "walk_speed" -> String.valueOf(p.getWalkSpeed());
                     case "weather_duration" -> String.valueOf(p.getWorld().getWeatherDuration());
+
                     case "world_time" -> String.valueOf(p.getWorld().getTime());
                     case "world_time_12" -> format12(p.getWorld().getTime());
                     case "world_time_24" -> format24(p.getWorld().getTime());
+
                     case "is_flying" -> bool(p.isFlying());
                     case "is_sleeping" -> bool(p.isSleeping());
                     case "is_conversing" -> bool(p.isConversing());
@@ -315,12 +323,23 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
         return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
     }
 
-
     private String retrievePing(final Player player, final boolean colored) {
-        final int ping = versionHelper.getPing(player);
-        if (!colored) return String.valueOf(ping);
+        int ping = versionHelper.getPing(player);
+        String pingStr = String.valueOf(ping);
+        if (!colored) return pingStr;
 
-        return ChatColor.translateAlternateColorCodes('&', ping > highValue ? high : ping > mediumValue ? medium : low) + ping;
+        for (String range : pingColors.keySet()) {
+            if (range.contains("-")) {
+                String[] bounds = range.split("-");
+                int bound1 = Integer.parseInt(bounds[0]);
+                if (bounds.length == 1 && ping < bound1) continue;
+                int bound2 = Integer.parseInt(bounds[1]);
+                if (ping < bound1 || ping > bound2) continue;
+            } else if (!pingStr.equals(range)) continue;
+
+            return ChatColor.translateAlternateColorCodes('&', pingColors.get(range)+pingStr);
+        }
+        return pingStr;
     }
 
 }
