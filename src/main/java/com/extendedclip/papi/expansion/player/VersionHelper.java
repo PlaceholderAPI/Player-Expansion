@@ -22,8 +22,6 @@ public final class VersionHelper {
 
     public static final boolean IS_1_17_OR_NEWER = VERSION >= 1_17_0;
 
-    public static final boolean IS_1_20_OR_NEWER = VERSION >= 1_20_0;
-
     private VersionHelper() { }
 
     /**
