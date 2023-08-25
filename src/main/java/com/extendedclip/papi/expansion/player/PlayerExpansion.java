@@ -57,6 +57,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     private final SimpleDateFormat dateFormat = PlaceholderAPIPlugin.getDateFormat();
     private final VersionHelper versionHelper;
+    final Map<Player, Long> joinTimes = new HashMap<>();
 
     private final Map<String,String> pingColors = new HashMap<>();
 
@@ -132,6 +133,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
             case "first_played_formatted", "first_join_date" -> dateFormat.format(new Date(player.getFirstPlayed()));
             case "last_played", "last_join" -> String.valueOf(player.getLastPlayed());
             case "time_since_last_played", "time_since_last_join" -> String.valueOf(System.currentTimeMillis()-player.getLastPlayed());
+            case "time_since_last_played_formatted", "time_since_last_join_formatted" -> dateFormat.format(new Date(System.currentTimeMillis()-player.getLastPlayed()));
             case "last_played_formatted", "last_join_date" -> dateFormat.format(new Date(player.getLastPlayed()));
             case "bed_x", "bed_y", "bed_z", "bed_world" -> PlayerUtil.getBedLocation(player,identifier.substring(4));
             default -> {
@@ -177,6 +179,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                 }
 
                 yield switch (identifier) {
+                    case "time_since_join" -> String.valueOf(System.currentTimeMillis()- joinTimes.getOrDefault(p,0L));
+                    case "time_since_join_formatted" -> dateFormat.format(new Date(System.currentTimeMillis()- joinTimes.getOrDefault(p,0L)));
+
                     case "absorption" -> String.valueOf(versionHelper.getAbsorption(p));
                     case "has_empty_slot" -> bool(p.getInventory().firstEmpty() > -1);
                     case "empty_slots" -> String.valueOf(getEmptySlots(p));
