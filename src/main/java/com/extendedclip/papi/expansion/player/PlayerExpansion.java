@@ -30,6 +30,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -62,15 +63,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     final Map<Player, Long> joinTimes = new HashMap<>();
     private final Map<String,String> pingColors = new HashMap<>();
-
-    private String north;
-    private String northEast;
-    private String east;
-    private String southEast;
-    private String south;
-    private String southWest;
-    private String west;
-    private String northWest;
+    private final Map<BlockFace,String> directions = new HashMap<>();
 
     public PlayerExpansion() {
         defaults = new HashMap<>() {{
@@ -99,14 +92,15 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
         ConfigurationSection ping = getConfigSection("ping");
         if (ping != null) ping.getValues(false).forEach((range,color)->pingColors.put(range,String.valueOf(color)));
 
-        north = getString("direction.north", "N");
-        northEast = getString("direction.north_east", "NE");
-        east = getString("direction.east", "E");
-        southEast = getString("direction.south_east", "SE");
-        south = getString("direction.south", "S");
-        southWest = getString("direction.south_west", "SW");
-        west = getString("direction.west", "W");
-        northWest = getString("direction.north_west", "NW");
+
+        ConfigurationSection directionsCfg = getConfigSection("direction");
+        if (directionsCfg != null) directionsCfg.getValues(false).forEach((direction,output)->{
+            try {
+                BlockFace face = BlockFace.valueOf(direction.toUpperCase());
+                directions.put(face,String.valueOf(output));
+            }
+            catch (Exception ignored) {}
+        });
 
         Bukkit.getServer().getPluginManager().registerEvents(listener,getPlaceholderAPI());
     }
@@ -194,17 +188,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "list_name" -> p.getPlayerListName();
                     case "gamemode" -> p.getGameMode().name();
 
-                    case "direction" -> switch (getDirection(p)) {
-                            case NORTH -> north;
-                            case NORTH_EAST -> northEast;
-                            case EAST -> east;
-                            case SOUTH_EAST -> southEast;
-                            case SOUTH -> south;
-                            case SOUTH_WEST -> southWest;
-                            case WEST -> west;
-                            case NORTH_WEST -> northWest;
-                            default -> "";
-                    };
+                    case "direction" -> directions.getOrDefault(getDirection(p),getDirection(p).toString());
                     case "direction_xz" -> getXZDirection(p);
 
                     case "world" -> p.getWorld().getName();
