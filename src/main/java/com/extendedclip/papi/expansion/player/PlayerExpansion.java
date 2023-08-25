@@ -21,6 +21,7 @@
 
 package com.extendedclip.papi.expansion.player;
 
+import lombok.Getter;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -34,8 +35,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
@@ -48,6 +47,12 @@ import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
 
 public final class PlayerExpansion extends PlaceholderExpansion implements Configurable {
+
+    @Getter private final String identifier = "player";
+    @Getter private final String author = "clip";
+    @Getter private final String version= "2.1.0";
+    @Getter private final Map<String, Object> defaults;
+
     private String low;
     private String medium;
     private String high;
@@ -64,38 +69,22 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     private String west;
     private String northWest;
 
-    @Override
-    public String getIdentifier() {
-        return "player";
-    }
-
-    @Override
-    public String getAuthor() {
-        return "clip";
-    }
-
-    @Override
-    public String getVersion() {
-        return "2.0.5";
-    }
-
-    @Override
-    public Map<String, Object> getDefaults() {
-        Map<String, Object> defaults = new HashMap<>();
-        defaults.put("ping_color.high", "&c");
-        defaults.put("ping_color.medium", "&e");
-        defaults.put("ping_color.low", "&a");
-        defaults.put("ping_value.medium", 50);
-        defaults.put("ping_value.high", 100);
-        defaults.put("direction.north", "N");
-        defaults.put("direction.north_east", "NE");
-        defaults.put("direction.east", "E");
-        defaults.put("direction.south_east", "SE");
-        defaults.put("direction.south", "S");
-        defaults.put("direction.south_west", "SW");
-        defaults.put("direction.west", "W");
-        defaults.put("direction.north_west", "NW");
-        return defaults;
+    public PlayerExpansion() {
+        defaults = new HashMap<>() {{
+            put("ping_color.high", "&c");
+            put("ping_color.medium", "&e");
+            put("ping_color.low", "&a");
+            put("ping_value.medium", 50);
+            put("ping_value.high", 100);
+            put("direction.north", "N");
+            put("direction.north_east", "NE");
+            put("direction.east", "E");
+            put("direction.south_east", "SE");
+            put("direction.south", "S");
+            put("direction.south_west", "SW");
+            put("direction.west", "W");
+            put("direction.north_west", "NW");
+        }};
     }
 
     @Override
