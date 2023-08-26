@@ -47,6 +47,10 @@ public final class PlayerUtil {
 
     private PlayerUtil() {}
 
+    public static String msToSToStr(double ms) {
+        return String.valueOf(Math.round((System.currentTimeMillis()-ms)/1000));
+    }
+
     public static String format12(long ticks) {
         try {
             return twelve.format(twentyFour.parse(ticksToTime(ticks)));
