@@ -312,8 +312,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
     }
 
     private Object requestItem(String identifier, int substring, ItemStack item) {
-        if (item == null) return List.of("","_name","_data","_durability").contains(identifier.substring(substring)) ? "" : null;
-        return switch (identifier.substring(substring)) {
+        identifier = identifier.substring(substring);
+        if (item == null) return List.of("","_name","_data","_durability").contains(identifier) ? "" : null;
+        return switch (identifier) {
             case "" -> item.getType();
             case "_name" -> {
                 ItemMeta meta = item.getItemMeta();
@@ -321,7 +322,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
             }
             case "_data", "_durability" -> {
                 int damage = versionHelper.getItemDamage(item);
-                yield identifier.equals("_durability") ? damage : item.getType().getMaxDurability() - damage;
+                yield identifier.equals("_data") ? damage : item.getType().getMaxDurability() - damage;
             }
             default -> null;
         };
