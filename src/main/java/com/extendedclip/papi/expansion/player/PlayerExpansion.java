@@ -26,10 +26,7 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Taskable;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -161,6 +158,12 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     if (potion == null || !p.hasPotionEffect(potion)) yield "0";
                     PotionEffect potionEffect = p.getPotionEffect(potion);
                     yield potionEffect == null ? "0" : potionEffect.getAmplifier();
+                }
+
+                if (identifier.startsWith("has_unlocked_recipe_")) {
+                    String recipe = identifier.substring(20);
+                    NamespacedKey key = NamespacedKey.fromString(recipe);
+                    yield key != null && p.hasDiscoveredRecipe(key);
                 }
 
                 if (identifier.startsWith("item_in_hand_level_"))
