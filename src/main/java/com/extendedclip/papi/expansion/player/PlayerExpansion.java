@@ -50,9 +50,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
     private final VersionHelper versionHelper;
     private final PlayerListener listener;
 
-    final Map<Player, Long> joinTimes = new HashMap<>();
     private final Map<String,String> pingColors = new HashMap<>();
     private final Map<BlockFace,String> directions = new HashMap<>();
+    final Map<Player, Long> joinTimes = new HashMap<>();
+    final Map<Player,Double> damagesGiven = new HashMap<>();
 
     public PlayerExpansion() {
         defaults = new HashMap<>() {{
@@ -269,7 +270,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "remaining_air" -> p.getRemainingAir();
                     case "max_no_damage_ticks" -> p.getMaximumNoDamageTicks();
                     case "no_damage_ticks" -> p.getNoDamageTicks();
-                    case "last_damage" -> p.getLastDamage();
+                    case "last_damage", "last_damage_taken" -> p.getLastDamage();
+                    case "last_damage_given" -> damagesGiven.getOrDefault(p,0D);
 
                     case "has_empty_slot" -> p.getInventory().firstEmpty() > -1;
                     case "empty_slots" -> PlayerUtil.getEmptySlots(p);
