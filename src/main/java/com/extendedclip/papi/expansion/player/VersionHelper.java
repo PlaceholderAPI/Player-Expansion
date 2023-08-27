@@ -82,9 +82,9 @@ public final class VersionHelper {
         }
     }
 
-    public int getPing(Player player) {
+    public Object getPing(Player player) {
         if (IS_1_17_OR_NEWER) return player.getPing();
-        try {return (int) ping.get(getHandle.invoke(player));}
+        try {return ping.get(getHandle.invoke(player));}
         catch (IllegalAccessException | InvocationTargetException e) {return -1;}
     }
 
