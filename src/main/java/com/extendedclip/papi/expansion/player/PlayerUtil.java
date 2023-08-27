@@ -24,7 +24,6 @@ package com.extendedclip.papi.expansion.player;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -89,17 +88,6 @@ public final class PlayerUtil {
         return "";
     }
 
-    @SuppressWarnings("deprecation")
-    public static ItemStack itemInHand(Player p) {
-        try {return p.getInventory().getItemInMainHand();}
-        catch (NoSuchMethodError e) {return p.getInventory().getItemInHand();}
-    }
-
-    @SuppressWarnings("deprecation")
-    public static int durability(ItemStack item) {
-        return item == null ? 0 : item.getType().getMaxDurability() - item.getDurability();
-    }
-
     public static int getEmptySlots(Player p) {
         int slots = 0;
         PlayerInventory inv = p.getInventory();
@@ -132,36 +120,25 @@ public final class PlayerUtil {
         return Math.max(experience, 0);
     }
 
-    public static String getBiome(Player p) {
-        return String.valueOf(p.getLocation().getBlock().getBiome());
-    }
-
-    public static String getCapitalizedBiome(Player p) {
-        String[] biomeWords = getBiome(p).split("_");
-        for (int i = 0; i < biomeWords.length; i++) {
-            biomeWords[i] = biomeWords[i].substring(0, 1).toUpperCase() + biomeWords[i].substring(1).toLowerCase();
-        }
-        return String.join(" ", biomeWords);
-    }
-
-    public static String getBedLocation(OfflinePlayer player, String pos) {
-        Location location = player.getBedSpawnLocation();
+    public static Object getLocation(Location location, String pos) {
         if (location == null) return "";
-        Object output = switch (pos) {
+        return switch (pos) {
             case "x" -> location.getX();
             case "y" -> location.getY();
             case "z" -> location.getZ();
             case "world" -> location.getWorld() == null ? "" : location.getWorld().getName();
+            case "block_x" -> location.getBlockX();
+            case "block_y" -> location.getBlockY();
+            case "block_z" -> location.getBlockZ();
             default -> "";
         };
-        return String.valueOf(output);
     }
-    public static String getItemEnchantment(Player player, String identifier, boolean mainhand) {
-        String enchantment = identifier.substring(mainhand ? 19 : 22);
-        Enchantment enchant = Enchantment.getByName(enchantment);
-        if (enchant == null) return "0";
-        ItemStack item = mainhand ? itemInHand(player) : player.getInventory().getItemInOffHand();
-        return String.valueOf(item.getEnchantmentLevel(enchant));
+
+    @SuppressWarnings("deprecation")
+    public static String getItemEnchantment(String enchant, ItemStack item) {
+        Enchantment enchantment = Enchantment.getByName(enchant);
+        if (enchantment == null) return "0";
+        return String.valueOf(item.getEnchantmentLevel(enchantment));
     }
 
 }

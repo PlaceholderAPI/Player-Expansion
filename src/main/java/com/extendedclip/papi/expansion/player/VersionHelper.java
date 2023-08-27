@@ -2,11 +2,15 @@ package com.extendedclip.papi.expansion.player;
 
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,8 +22,8 @@ public final class VersionHelper {
 
     private final int VERSION = getCurrentVersion();
 
+    private final boolean IS_1_9_OR_NEWER = VERSION >= 1_9_0;
     private final boolean HAS_LOCALE_METHOD = VERSION >= 1_12_0;
-    private final boolean HAS_ABSORPTION_METHODS = VERSION >= 1_15_0;
     private final boolean IS_1_17_OR_NEWER = VERSION >= 1_17_0;
 
     private Method getHandle;
@@ -91,7 +95,23 @@ public final class VersionHelper {
     }
 
     public double getAbsorption(Player player) {
-        return HAS_ABSORPTION_METHODS ? player.getAbsorptionAmount() : -1;
+        return VERSION >= 1_15_0 ? player.getAbsorptionAmount() : -1;
+    }
+    @SuppressWarnings("deprecation")
+    public double getMaxHealth(Player p) {
+        return IS_1_9_OR_NEWER ? Objects.requireNonNull(p.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getValue() : p.getMaxHealth();
+    }
+
+    @SuppressWarnings("deprecation")
+    public ItemStack getItemInHand(Player p) {
+        return IS_1_9_OR_NEWER ? p.getInventory().getItemInMainHand() : p.getInventory().getItemInHand();
+    }
+    @SuppressWarnings("deprecation")
+    public int getItemDamage(ItemStack item) {
+        return VERSION >= 1_13_0 ? item.getItemMeta() instanceof Damageable damageable
+                    ? damageable.getDamage()
+                    : 0
+                : item.getDurability();
     }
 
 }

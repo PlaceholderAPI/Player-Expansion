@@ -34,21 +34,20 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getBiome;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getCapitalizedBiome;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getEmptySlots;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getDirection;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperience;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.itemInHand;
 
 public final class PlayerExpansion extends PlaceholderExpansion implements Taskable, Configurable {
 
@@ -121,21 +120,30 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
         if (player == null) return "";
 
-        // offline placeholders
+        Object output = request(player,identifier);
+        return output == null ? null
+                : output instanceof Boolean bool ?
+                    bool ? PlaceholderAPIPlugin.booleanTrue()
+                            : PlaceholderAPIPlugin.booleanFalse()
+                : String.valueOf(output);
+    }
+
+    public Object request(OfflinePlayer player, String identifier) {
         return switch (identifier) {
+            // offline placeholders
             case "name" -> player.getName();
-            case "uuid" -> player.getUniqueId().toString();
-            case "has_played_before" -> bool(player.hasPlayedBefore());
-            case "online" -> bool(player.isOnline());
-            case "is_whitelisted" -> bool(player.isWhitelisted());
-            case "is_banned" -> bool(player.isBanned());
-            case "is_op" -> bool(player.isOp());
-            case "first_played", "first_join" -> String.valueOf(player.getFirstPlayed());
+            case "uuid" -> player.getUniqueId();
+            case "has_played_before" -> player.hasPlayedBefore();
+            case "online" -> player.isOnline();
+            case "is_whitelisted" -> player.isWhitelisted();
+            case "is_banned" -> player.isBanned();
+            case "is_op" -> player.isOp();
+            case "first_played", "first_join" -> player.getFirstPlayed();
             case "first_played_formatted", "first_join_date" -> dateFormat.format(new Date(player.getFirstPlayed()));
-            case "last_played", "last_join" -> String.valueOf(player.getLastPlayed());
+            case "last_played", "last_join" -> player.getLastPlayed();
             case "last_played_formatted", "last_join_date" -> dateFormat.format(new Date(player.getLastPlayed()));
             case "time_since_last_played", "time_since_last_join" -> PlayerUtil.msToSToStr(player.getLastPlayed());
-            case "bed_x", "bed_y", "bed_z", "bed_world" -> PlayerUtil.getBedLocation(player,identifier.substring(4));
+            case "bed_x", "bed_y", "bed_z", "bed_world" -> PlayerUtil.getLocation(player.getBedSpawnLocation(),identifier.substring(4));
             default -> {
                 // online placeholders
                 if (!player.isOnline()) yield "";
@@ -146,16 +154,26 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                 if (p == null) yield "";
 
                 if (identifier.startsWith("has_permission_"))
-                    yield bool(p.hasPermission(identifier.substring(15)));
+                    yield p.hasPermission(identifier.substring(15));
 
-                if (identifier.startsWith("has_potioneffect_")) {
-                    String effect = identifier.substring(17);
+                if (identifier.startsWith("has_potion_effect_")) {
+                    String effect = identifier.substring(18);
                     PotionEffectType potion = PotionEffectType.getByName(effect);
-                    yield bool(potion != null && p.hasPotionEffect(potion));
+                    yield potion != null && p.hasPotionEffect(potion);
                 }
 
-                if (identifier.startsWith("item_in_hand_level_") || identifier.startsWith("item_in_offhand_level_"))
-                    yield PlayerUtil.getItemEnchantment(p,identifier,identifier.startsWith("item_in_hand_level_"));
+                if (identifier.startsWith("potion_effect_level_")) {
+                    String effect = identifier.substring(20);
+                    PotionEffectType potion = PotionEffectType.getByName(effect);
+                    if (potion == null || !p.hasPotionEffect(potion)) yield "0";
+                    PotionEffect potionEffect = p.getPotionEffect(potion);
+                    yield potionEffect == null ? "0" : potionEffect.getAmplifier();
+                }
+
+                if (identifier.startsWith("item_in_hand_level_"))
+                    yield PlayerUtil.getItemEnchantment(identifier.substring(19),versionHelper.getItemInHand(p));
+                if (identifier.startsWith("item_in_offhand_level_"))
+                    yield PlayerUtil.getItemEnchantment(identifier.substring(22),p.getInventory().getItemInOffHand());
 
                 if (identifier.startsWith("locale")) {
                     String localeStr = versionHelper.getLocale(p);
@@ -179,17 +197,21 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                 }
 
                 yield switch (identifier) {
-                    case "time_since_join" -> PlayerUtil.msToSToStr(joinTimes.getOrDefault(p,0L));
-
-                    case "absorption" -> String.valueOf(versionHelper.getAbsorption(p));
-                    case "has_empty_slot" -> bool(p.getInventory().firstEmpty() > -1);
-                    case "empty_slots" -> String.valueOf(getEmptySlots(p));
                     case "displayname" -> p.getDisplayName();
                     case "list_name" -> p.getPlayerListName();
+                    case "custom_name" -> p.getCustomName() != null ? p.getCustomName() : p.getName();
                     case "gamemode" -> p.getGameMode().name();
+                    case "ip" -> p.getAddress() == null ? "" : p.getAddress().getAddress().getHostAddress();
+                    case "ping" -> retrievePing(p, false);
+                    case "colored_ping" -> retrievePing(p, true);
 
-                    case "direction" -> directions.getOrDefault(getDirection(p),getDirection(p).toString());
-                    case "direction_xz" -> getXZDirection(p);
+                    case "is_sleeping" -> p.isSleeping();
+                    case "is_conversing" -> p.isConversing();
+                    case "is_dead" -> p.isDead();
+                    case "is_sneaking" -> p.isSneaking();
+                    case "is_sprinting" -> p.isSprinting();
+                    case "is_leashed" -> p.isLeashed();
+                    case "is_inside_vehicle" -> p.isInsideVehicle();
 
                     case "world" -> p.getWorld().getName();
                     case "world_type" -> switch (p.getWorld().getEnvironment()) {
@@ -198,124 +220,111 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                         case NORMAL -> "Overworld";
                         case CUSTOM -> "Custom";
                     };
-                    case "x" -> String.valueOf(p.getLocation().getBlockX());
-                    case "x_long" -> String.valueOf(p.getLocation().getX());
-                    case "y" -> String.valueOf(p.getLocation().getBlockY());
-                    case "y_long" -> String.valueOf(p.getLocation().getY());
-                    case "z" -> String.valueOf(p.getLocation().getBlockZ());
-                    case "z_long" -> String.valueOf(p.getLocation().getZ());
-                    case "yaw" -> String.valueOf(p.getLocation().getYaw());
-                    case "pitch" -> String.valueOf(p.getLocation().getPitch());
+                    case "biome","biome_capitalized" -> {
+                        String biome = String.valueOf(p.getLocation().getBlock().getBiome());
+                        if (identifier.equals("biome")) yield biome;
 
-                    case "biome" -> getBiome(p);
-                    case "biome_capitalized" -> getCapitalizedBiome(p);
+                        String[] biomeWords = biome.split("_");
+                        for (int i = 0; i < biomeWords.length; i++) {
+                            biomeWords[i] = biomeWords[i].substring(0, 1).toUpperCase() + biomeWords[i].substring(1).toLowerCase();
+                        }
+                        yield String.join(" ", biomeWords);
+                    }
 
-                    case "light_level" -> String.valueOf(p.getLocation().getBlock().getLightLevel());
-                    case "ip" -> p.getAddress().getAddress().getHostAddress();
-                    case "allow_flight" -> bool(p.getAllowFlight());
-                    case "can_pickup_items" -> bool(p.getCanPickupItems());
+                    case "x_long", "y_long", "z_long", "yaw", "pitch" -> PlayerUtil.getLocation(p.getLocation(),identifier.contains("_")
+                            ? identifier.substring(0,identifier.indexOf("_"))
+                            : identifier);
+                    case "x","y","z" -> PlayerUtil.getLocation(p.getLocation(),"block_"+identifier);
+                    case "block_underneath" -> p.getLocation().clone().subtract(0, 1, 0).getBlock().getType();
+                    case "compass_x", "compass_y", "compass_z", "compass_world" -> PlayerUtil.getLocation(p.getCompassTarget(),identifier.substring(8));
 
-                    case "compass_x" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockX()) : "";
-                    case "compass_y" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockY()) : "";
-                    case "compass_z" -> p.getCompassTarget() != null ? String.valueOf(p.getCompassTarget().getBlockZ()) : "";
-                    case "compass_world" -> p.getCompassTarget() != null ? p.getCompassTarget().getWorld().getName() : "";
+                    case "light_level" -> p.getLocation().getBlock().getLightLevel();
 
-                    case "block_underneath" -> String.valueOf(p.getLocation().clone().subtract(0, 1, 0).getBlock().getType());
-                    case "custom_name" -> p.getCustomName() != null ? p.getCustomName() : p.getName();
+                    case "direction" -> directions.getOrDefault(getDirection(p),getDirection(p).toString());
+                    case "direction_xz" -> getXZDirection(p);
 
-                    case "exp" -> String.valueOf(p.getExp());
-                    case "current_exp" -> String.valueOf(getTotalExperience(p));
-                    case "total_exp" -> String.valueOf(p.getTotalExperience());
-                    case "exp_to_level" -> String.valueOf(p.getExpToLevel());
-                    case "level" -> String.valueOf(p.getLevel());
+                    case "allow_flight" -> p.getAllowFlight();
+                    case "is_flying" -> p.isFlying();
+                    case "fly_speed" -> p.getFlySpeed();
+                    case "walk_speed" -> p.getWalkSpeed();
 
-                    case "fly_speed" -> String.valueOf(p.getFlySpeed());
-                    case "food_level" -> String.valueOf(p.getFoodLevel());
+                    case "exp" -> p.getExp();
+                    case "current_exp" -> getTotalExperience(p);
+                    case "total_exp" -> p.getTotalExperience();
+                    case "exp_to_level" -> p.getExpToLevel();
+                    case "level" -> p.getLevel();
 
-                    case "health" -> String.valueOf(p.getHealth());
-                    case "health_rounded" -> String.valueOf(Math.round(p.getHealth()));
-                    case "health_scale" -> String.valueOf(p.getHealthScale());
-                    case "has_health_boost" -> bool(p.hasPotionEffect(PotionEffectType.HEALTH_BOOST));
+
+                    case "absorption" -> versionHelper.getAbsorption(p);
+                    case "health" -> p.getHealth();
+                    case "health_rounded" -> Math.round(p.getHealth());
+                    case "health_scale" -> p.getHealthScale();
+                    case "has_health_boost" -> p.hasPotionEffect(PotionEffectType.HEALTH_BOOST);
                     case "health_boost" -> p.getHealthScale() > 20 ? Double.toString(p.getHealthScale() - 20) : "0";
 
-                    case "item_in_hand" -> String.valueOf(itemInHand(p).getType());
-                    case "item_in_hand_name" ->
-                            itemInHand(p).getType() != Material.AIR && itemInHand(p).getItemMeta().hasDisplayName() ? itemInHand(p).getItemMeta().getDisplayName() : "";
-                    case "item_in_hand_data" ->
-                            itemInHand(p).getType() != Material.AIR ? String.valueOf(itemInHand(p).getDurability()) : "0";
-                    case "item_in_hand_durability" -> String.valueOf(durability(itemInHand(p)));
-                    case "item_in_offhand" -> String.valueOf(p.getInventory().getItemInOffHand().getType());
-                    case "item_in_offhand_name" ->
-                            p.getInventory().getItemInOffHand().getType() != Material.AIR && p.getInventory().getItemInOffHand().getItemMeta().hasDisplayName() ? p.getInventory().getItemInOffHand().getItemMeta().getDisplayName() : "";
-                    case "item_in_offhand_data" ->
-                            p.getInventory().getItemInOffHand().getType() != Material.AIR ? String.valueOf(p.getInventory().getItemInOffHand().getDurability()) : "0";
-                    case "item_in_offhand_durability" ->
-                            String.valueOf(durability(p.getInventory().getItemInOffHand()));
+                    case "max_health" -> versionHelper.getMaxHealth(p);
+                    case "max_health_rounded" -> Math.round(versionHelper.getMaxHealth(p));
+                    case "food_level" -> p.getFoodLevel();
+                    case "saturation" -> p.getSaturation();
+                    case "max_air" -> p.getMaximumAir();
+                    case "remaining_air" -> p.getRemainingAir();
+                    case "max_no_damage_ticks" -> p.getMaximumNoDamageTicks();
+                    case "no_damage_ticks" -> p.getNoDamageTicks();
+                    case "last_damage" -> p.getLastDamage();
 
-                    case "last_damage" -> String.valueOf(p.getLastDamage());
-                    case "max_health" -> String.valueOf(p.getMaxHealth());
-                    case "max_health_rounded" -> String.valueOf(Math.round(p.getMaxHealth()));
-                    case "max_air" -> String.valueOf(p.getMaximumAir());
-                    case "max_no_damage_ticks" -> String.valueOf(p.getMaximumNoDamageTicks());
-                    case "no_damage_ticks" -> String.valueOf(p.getNoDamageTicks());
+                    case "has_empty_slot" -> p.getInventory().firstEmpty() > -1;
+                    case "empty_slots" -> getEmptySlots(p);
+                    case "can_pickup_items" -> p.getCanPickupItems();
 
-                    case "armor_helmet_name" ->
-                            Optional.ofNullable(p.getInventory().getHelmet()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-                    case "armor_helmet_data" ->
-                            p.getInventory().getHelmet() != null ? String.valueOf(p.getInventory().getHelmet().getDurability()) : "0";
-                    case "armor_helmet_durability" -> String.valueOf(durability(p.getInventory().getHelmet()));
-                    case "armor_chestplate_name" ->
-                            Optional.ofNullable(p.getInventory().getChestplate()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-                    case "armor_chestplate_data" ->
-                            p.getInventory().getChestplate() != null ? String.valueOf(p.getInventory().getChestplate().getDurability()) : "0";
-                    case "armor_chestplate_durability" -> String.valueOf(durability(p.getInventory().getChestplate()));
-                    case "armor_leggings_name" ->
-                            Optional.ofNullable(p.getInventory().getLeggings()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-                    case "armor_leggings_data" ->
-                            p.getInventory().getLeggings() != null ? String.valueOf(p.getInventory().getLeggings().getDurability()) : "0";
-                    case "armor_leggings_durability" -> String.valueOf(durability(p.getInventory().getLeggings()));
-                    case "armor_boots_name" ->
-                            Optional.ofNullable(p.getInventory().getBoots()).map(a -> a.getItemMeta().getDisplayName()).orElse("");
-                    case "armor_boots_data" ->
-                            p.getInventory().getBoots() != null ? String.valueOf(p.getInventory().getBoots().getDurability()) : "0";
-                    case "armor_boots_durability" -> String.valueOf(durability(p.getInventory().getBoots()));
+                    case "item_in_hand","item_in_hand_name","item_in_hand_data","item_in_hand_durability",
+                            "item_in_offhand","item_in_offhand_name","item_in_offhand_data","item_in_offhand_durability",
+                            "armor_helmet_name","armor_helmet_data","armor_helmet_durability",
+                            "armor_chestplate_name","armor_chestplate_data","armor_chestplate_durability",
+                            "armor_leggings_name","armor_leggings_data","armor_leggings_durability",
+                            "armor_boots_name","armor_boots_data","armor_boots_durability" -> {
+                        if (identifier.startsWith("item_in_hand")) yield requestItem(identifier,12,versionHelper.getItemInHand(p));
+                        if (identifier.startsWith("item_in_offhand")) yield requestItem(identifier,15,p.getInventory().getItemInOffHand());
+                        if (identifier.startsWith("armor_helmet_")) yield requestItem(identifier,13,p.getInventory().getHelmet());
+                        if (identifier.startsWith("armor_chestplate_")) yield requestItem(identifier,17,p.getInventory().getChestplate());
+                        if (identifier.startsWith("armor_leggings_")) yield requestItem(identifier,15,p.getInventory().getLeggings());
+                        if (identifier.startsWith("armor_boots_")) yield requestItem(identifier,12,p.getInventory().getBoots());
+                        yield null;
+                    }
 
-                    case "ping" -> retrievePing(p, false);
-                    case "colored_ping" -> retrievePing(p, true);
+                    case "time_since_join" -> PlayerUtil.msToSToStr(joinTimes.getOrDefault(p,0L));
+                    case "sleep_ticks" -> p.getSleepTicks();
+                    case "thunder_duration" -> p.getWorld().getThunderDuration();
+                    case "ticks_lived" -> p.getTicksLived();
+                    case "seconds_lived" -> p.getTicksLived() / 20;
+                    case "minutes_lived" -> p.getTicksLived() / 1200;
 
-                    case "time" -> String.valueOf(p.getPlayerTime());
-                    case "time_offset" -> String.valueOf(p.getPlayerTimeOffset());
-
-                    case "remaining_air" -> String.valueOf(p.getRemainingAir());
-                    case "saturation" -> String.valueOf(p.getSaturation());
-                    case "sleep_ticks" -> String.valueOf(p.getSleepTicks());
-                    case "thunder_duration" -> String.valueOf(p.getWorld().getThunderDuration());
-                    case "ticks_lived" -> String.valueOf(p.getTicksLived());
-                    case "seconds_lived" -> String.valueOf(p.getTicksLived() / 20);
-                    case "minutes_lived" -> String.valueOf((p.getTicksLived() / 20) / 60);
-                    case "walk_speed" -> String.valueOf(p.getWalkSpeed());
-                    case "weather_duration" -> String.valueOf(p.getWorld().getWeatherDuration());
-
-                    case "world_time" -> String.valueOf(p.getWorld().getTime());
+                    case "world_time" -> p.getWorld().getTime();
                     case "world_time_12" -> format12(p.getWorld().getTime());
                     case "world_time_24" -> format24(p.getWorld().getTime());
+                    case "time" -> p.getPlayerTime();
+                    case "time_offset" -> p.getPlayerTimeOffset();
+                    case "weather_duration" -> p.getWorld().getWeatherDuration();
 
-                    case "is_flying" -> bool(p.isFlying());
-                    case "is_sleeping" -> bool(p.isSleeping());
-                    case "is_conversing" -> bool(p.isConversing());
-                    case "is_dead" -> bool(p.isDead());
-                    case "is_sneaking" -> bool(p.isSneaking());
-                    case "is_sprinting" -> bool(p.isSprinting());
-                    case "is_leashed" -> bool(p.isLeashed());
-                    case "is_inside_vehicle" -> bool(p.isInsideVehicle());
                     default -> null;
                 };
             }
         };
     }
 
-    public String bool(boolean b) {
-        return b ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+    private Object requestItem(String identifier, int substring, ItemStack item) {
+        if (item == null) return List.of("","_name","_data","_durability").contains(identifier.substring(substring)) ? "" : null;
+        return switch (identifier.substring(substring)) {
+            case "" -> item.getType();
+            case "_name" -> {
+                ItemMeta meta = item.getItemMeta();
+                yield item.getType() != Material.AIR && meta != null && meta.hasDisplayName() ? meta.getDisplayName() : "";
+            }
+            case "_data", "_durability" -> {
+                int damage = versionHelper.getItemDamage(item);
+                yield identifier.equals("_durability") ? damage : item.getType().getMaxDurability() - damage;
+            }
+            default -> null;
+        };
     }
 
     private String retrievePing(final Player player, final boolean colored) {
