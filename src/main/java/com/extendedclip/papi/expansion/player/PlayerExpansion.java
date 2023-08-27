@@ -250,7 +250,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "exp_to_level" -> p.getExpToLevel();
                     case "level" -> p.getLevel();
 
-
                     case "absorption" -> versionHelper.getAbsorption(p);
                     case "health" -> p.getHealth();
                     case "health_rounded" -> Math.round(p.getHealth());
@@ -258,6 +257,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "has_health_boost" -> p.hasPotionEffect(PotionEffectType.HEALTH_BOOST);
                     case "health_boost" -> PlayerUtil.getHealthBoost(p);
                     case "health_full" -> p.getHealth()+versionHelper.getAbsorption(p)+PlayerUtil.getHealthBoost(p);
+                    case "health_full_rounded" -> Math.round(p.getHealth()+versionHelper.getAbsorption(p)+PlayerUtil.getHealthBoost(p));
                     case "max_health" -> versionHelper.getMaxHealth(p);
                     case "max_health_rounded" -> Math.round(versionHelper.getMaxHealth(p));
                     case "food_level" -> p.getFoodLevel();
