@@ -58,9 +58,9 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
         defaults = new HashMap<>() {{
             put("ping",new HashMap<>() {{
                 put("-1", "&c");
-                put("0-50", "&a");
-                put("50-100", "&e");
-                put("100-", "&c");
+                put("0-100", "&a");
+                put("100-150", "&e");
+                put("150-", "&c");
             }});
 
             put("direction.north", "N");
