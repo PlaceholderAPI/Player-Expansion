@@ -29,6 +29,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -139,6 +141,12 @@ public final class PlayerUtil {
         Enchantment enchantment = Enchantment.getByName(enchant);
         if (enchantment == null) return "0";
         return String.valueOf(item.getEnchantmentLevel(enchantment));
+    }
+
+    public static int getHealthBoost(Player player) {
+        if (!player.hasPotionEffect(PotionEffectType.HEALTH_BOOST)) return 0;
+        PotionEffect potionEffect = player.getPotionEffect(PotionEffectType.HEALTH_BOOST);
+        return potionEffect == null ? 0 : potionEffect.getAmplifier()*2+2;
     }
 
 }

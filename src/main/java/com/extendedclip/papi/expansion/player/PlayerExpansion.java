@@ -42,13 +42,6 @@ import org.bukkit.potion.PotionEffectType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getEmptySlots;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getDirection;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getTotalExperience;
-import static com.extendedclip.papi.expansion.player.PlayerUtil.getXZDirection;
-
 public final class PlayerExpansion extends PlaceholderExpansion implements Taskable, Configurable {
 
     @Getter private final String identifier = "player";
@@ -240,8 +233,11 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
                     case "light_level" -> p.getLocation().getBlock().getLightLevel();
 
-                    case "direction" -> directions.getOrDefault(getDirection(p),getDirection(p).toString());
-                    case "direction_xz" -> getXZDirection(p);
+                    case "direction" -> {
+                        BlockFace direction = PlayerUtil.getDirection(p);
+                        yield directions.getOrDefault(direction,direction.toString());
+                    }
+                    case "direction_xz" -> PlayerUtil.getXZDirection(p);
 
                     case "allow_flight" -> p.getAllowFlight();
                     case "is_flying" -> p.isFlying();
@@ -249,7 +245,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "walk_speed" -> p.getWalkSpeed();
 
                     case "exp" -> p.getExp();
-                    case "current_exp" -> getTotalExperience(p);
+                    case "current_exp" -> PlayerUtil.getTotalExperience(p);
                     case "total_exp" -> p.getTotalExperience();
                     case "exp_to_level" -> p.getExpToLevel();
                     case "level" -> p.getLevel();
@@ -260,8 +256,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "health_rounded" -> Math.round(p.getHealth());
                     case "health_scale" -> p.getHealthScale();
                     case "has_health_boost" -> p.hasPotionEffect(PotionEffectType.HEALTH_BOOST);
-                    case "health_boost" -> p.getHealthScale() > 20 ? Double.toString(p.getHealthScale() - 20) : "0";
-
+                    case "health_boost" -> PlayerUtil.getHealthBoost(p);
+                    case "health_full" -> p.getHealth()+versionHelper.getAbsorption(p)+PlayerUtil.getHealthBoost(p);
                     case "max_health" -> versionHelper.getMaxHealth(p);
                     case "max_health_rounded" -> Math.round(versionHelper.getMaxHealth(p));
                     case "food_level" -> p.getFoodLevel();
@@ -273,7 +269,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "last_damage" -> p.getLastDamage();
 
                     case "has_empty_slot" -> p.getInventory().firstEmpty() > -1;
-                    case "empty_slots" -> getEmptySlots(p);
+                    case "empty_slots" -> PlayerUtil.getEmptySlots(p);
                     case "can_pickup_items" -> p.getCanPickupItems();
 
                     case "item_in_hand","item_in_hand_name","item_in_hand_data","item_in_hand_durability",
@@ -284,10 +280,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                             "armor_boots_name","armor_boots_data","armor_boots_durability" -> {
                         if (identifier.startsWith("item_in_hand")) yield requestItem(identifier,12,versionHelper.getItemInHand(p));
                         if (identifier.startsWith("item_in_offhand")) yield requestItem(identifier,15,p.getInventory().getItemInOffHand());
-                        if (identifier.startsWith("armor_helmet_")) yield requestItem(identifier,13,p.getInventory().getHelmet());
-                        if (identifier.startsWith("armor_chestplate_")) yield requestItem(identifier,17,p.getInventory().getChestplate());
-                        if (identifier.startsWith("armor_leggings_")) yield requestItem(identifier,15,p.getInventory().getLeggings());
-                        if (identifier.startsWith("armor_boots_")) yield requestItem(identifier,12,p.getInventory().getBoots());
+                        if (identifier.startsWith("armor_helmet")) yield requestItem(identifier,12,p.getInventory().getHelmet());
+                        if (identifier.startsWith("armor_chestplate")) yield requestItem(identifier,16,p.getInventory().getChestplate());
+                        if (identifier.startsWith("armor_leggings")) yield requestItem(identifier,14,p.getInventory().getLeggings());
+                        if (identifier.startsWith("armor_boots")) yield requestItem(identifier,11,p.getInventory().getBoots());
                         yield null;
                     }
 
@@ -299,8 +295,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                     case "minutes_lived" -> p.getTicksLived() / 1200;
 
                     case "world_time" -> p.getWorld().getTime();
-                    case "world_time_12" -> format12(p.getWorld().getTime());
-                    case "world_time_24" -> format24(p.getWorld().getTime());
+                    case "world_time_12" -> PlayerUtil.format12(p.getWorld().getTime());
+                    case "world_time_24" -> PlayerUtil.format24(p.getWorld().getTime());
                     case "time" -> p.getPlayerTime();
                     case "time_offset" -> p.getPlayerTimeOffset();
                     case "weather_duration" -> p.getWorld().getWeatherDuration();
@@ -313,7 +309,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
 
     private Object requestItem(String identifier, int substring, ItemStack item) {
         identifier = identifier.substring(substring);
-        if (item == null) return List.of("","_name","_data","_durability").contains(identifier) ? "" : null;
+        if (item == null) return identifier.isEmpty() || identifier.equals("_name") ? ""
+                : identifier.equals("_data") || identifier.equals("_durability") ? "0" : null;
         return switch (identifier) {
             case "" -> item.getType();
             case "_name" -> {
