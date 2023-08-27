@@ -320,6 +320,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Taska
                 ItemMeta meta = item.getItemMeta();
                 yield item.getType() != Material.AIR && meta != null && meta.hasDisplayName() ? meta.getDisplayName() : "";
             }
+            case "_lore" -> {
+                ItemMeta meta = item.getItemMeta();
+                yield meta != null && meta.hasLore() && meta.getLore() != null ? String.join("\n",meta.getLore()) : "";
+            }
             case "_data", "_durability" -> {
                 int damage = versionHelper.getItemDamage(item);
                 yield identifier.equals("_data") ? damage : item.getType().getMaxDurability() - damage;
