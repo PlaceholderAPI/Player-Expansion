@@ -76,7 +76,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
     @Override
     public String getVersion() {
-        return "2.0.6";
+        return "2.0.7";
     }
 
     @Override
