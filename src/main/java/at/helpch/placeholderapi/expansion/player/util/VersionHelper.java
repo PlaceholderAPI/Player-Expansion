@@ -2,6 +2,7 @@ package at.helpch.placeholderapi.expansion.player.util;
 
 import com.google.common.primitives.Ints;
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
@@ -17,16 +18,34 @@ public final class VersionHelper {
     private static final int VERSION = getCurrentVersion();
 
     /**
+     * @see Player#getAttribute(Attribute) 
+     * @since MC 1.9
+     */
+    public static final boolean HAS_ATTRIBUTE_API = VERSION >= 1_9_0;
+
+    /**
      * @see PlayerInventory#getItemInOffHand()
      * @since MC 1.9
      */
     public static final boolean HAS_OFF_HAND = VERSION >= 1_9_0;
 
     /**
+     * @see Player#getLocale()
+     * @since MC 1.12
+     */
+    public static final boolean HAS_PLAYER_LOCALE_METHOD = VERSION >= 1_12_0;
+
+    /**
      * @see org.bukkit.inventory.meta.Damageable
      * @since MC 1.13
      */
     public static final boolean HAS_DAMAGEABLE_ITEM_META = VERSION >= 1_13_0;
+
+    /**
+     * @see org.bukkit.Keyed
+     * @since MC 1.13
+     */
+    public static final boolean HAS_KEYED_API = VERSION >= 1_13_0;
 
     /**
      * @see Damageable#getAbsorptionAmount()
