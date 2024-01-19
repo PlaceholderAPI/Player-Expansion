@@ -125,7 +125,13 @@ public final class PlayerUtil {
 
             final Object entityPlayer = getHandle.invoke(player);
 
-            locale = entityPlayer.getClass().getField("locale");
+            if (VersionHelper.IS_1_20_4_OR_NEWER) {
+              locale = entityPlayer.getClass().getField("cO");
+            } else if (VersionHelper.IS_1_20_2_OR_NEWER) {
+              locale = entityPlayer.getClass().getField("cM");
+            } else {
+              locale = entityPlayer.getClass().getField("locale");
+            }
         }
     };
 

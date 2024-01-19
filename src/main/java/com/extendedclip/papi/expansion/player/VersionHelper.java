@@ -24,6 +24,16 @@ public final class VersionHelper {
      * @see Player#getPing()
      */
     public static final boolean IS_1_17_OR_NEWER = VERSION >= 1_17_0;
+    
+    /**
+     * @see Player#getLocale()
+     */
+    public static final boolean IS_1_20_2_OR_NEWER = VERSION >= 1_20_2;
+    
+    /**
+     * @see Player#getLocale()
+     */
+    public static final boolean IS_1_20_4_OR_NEWER = VERSION >= 1_20_4;
 
     private VersionHelper() { }
 
