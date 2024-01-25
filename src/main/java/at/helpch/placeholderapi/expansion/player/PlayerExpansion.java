@@ -1,7 +1,7 @@
 package at.helpch.placeholderapi.expansion.player;
 
 import at.helpch.placeholderapi.expansion.player.util.ItemUtil;
-import at.helpch.placeholderapi.expansion.player.util.PingFormatter;
+import at.helpch.placeholderapi.expansion.player.ping.PingFormatter;
 import at.helpch.placeholderapi.expansion.player.util.PlayerUtil;
 import at.helpch.placeholderapi.expansion.player.util.VersionHelper;
 import com.google.common.collect.ImmutableMap;
@@ -52,11 +52,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
     @Override
     public Map<String, Object> getDefaults() {
         return ImmutableMap.<String, Object>builder()
-            .put("ping_color.high", "&c")
-            .put("ping_color.medium", "&e")
-            .put("ping_color.low", "&a")
-            .put("ping_value.medium", 50)
-            .put("ping_value.high", 100)
             .put("direction.north", "N")
             .put("direction.north_east", "NE")
             .put("direction.east", "E")
@@ -65,18 +60,26 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             .put("direction.south_west", "SW")
             .put("direction.west", "W")
             .put("direction.north_west", "NW")
+            .put("ping.formatting.>200", "&4")
+            .put("ping.formatting.>150", "&c")
+            .put("ping.formatting.>100", "&e")
+            .put("ping.formatting.>75", "&2")
+            .put("ping.formatting.>50", "&a")
+            .put("ping.formatting.>25", "&b")
+            .put("ping.formatting.=0", "&9")
             .build();
     }
 
     @Override
     public boolean canRegister() {
-        pingFormatter = new PingFormatter(
+        /*pingFormatter = new PingFormatter(
             getInt("ping_value.medium", 50),
             getInt("ping_value.high", 100),
             getString("ping_color.low", "&a"),
             getString("ping_color.medium", "&e"),
             getString("ping_color.high", "&c")
-        );
+        );*/
+        pingFormatter = new PingFormatter(getConfigSection("ping.formatting"));
         directionNames = Optional.ofNullable(getConfigSection("direction"))
             .map(section -> section.getValues(false))
             .orElseGet(HashMap::new);

@@ -25,4 +25,8 @@ public final class Logging {
         log(Level.SEVERE, throwable, message, args);
     }
 
+    public static void warn(@NotNull final String message, @NotNull final Object... args) {
+        log(Level.WARNING, null, message, args);
+    }
+
 }
