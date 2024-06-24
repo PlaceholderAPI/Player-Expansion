@@ -3,6 +3,7 @@ package at.helpch.placeholderapi.expansion.player;
 import at.helpch.placeholderapi.expansion.player.util.ItemUtil;
 import at.helpch.placeholderapi.expansion.player.ping.PingFormatter;
 import at.helpch.placeholderapi.expansion.player.util.PlayerUtil;
+import at.helpch.placeholderapi.expansion.player.util.TimeUtil;
 import at.helpch.placeholderapi.expansion.player.util.VersionHelper;
 import com.google.common.collect.ImmutableMap;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
@@ -280,9 +281,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "world_time":
                 return String.valueOf(player.getWorld().getTime());
             case "world_time_12":
-                return null; // TODO world_time_12
             case "world_time_24":
-                return null; // TODO world_time_24
+                return TimeUtil.formatWorldTime(player.getWorld().getTime(), params.equals("world_time_24"));
             case "weather_duration":
                 return String.valueOf(player.getWorld().getWeatherDuration());
             case "thunder_duration":
