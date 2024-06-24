@@ -10,6 +10,7 @@ import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
@@ -505,6 +506,18 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 case "locale_short":
                     return localeString.substring(0, localeString.indexOf("_"));
             }
+        }
+
+        // has_unlocked_recipe_<recipe-key>
+        if (params.startsWith("has_unlocked_recipe_") && VersionHelper.HAS_KEYED_API) {
+            final String recipeName = params.substring("has_unlocked_recipe_".length());
+            final NamespacedKey recipeKey = (recipeName.contains(":")) ? NamespacedKey.fromString(recipeName) : NamespacedKey.minecraft(recipeName);
+
+            if (recipeKey == null) {
+                return "Unknown recipe " + recipeName;
+            }
+
+            return bool(player.hasDiscoveredRecipe(recipeKey));
         }
 
         return null;
