@@ -15,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,13 +73,6 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
     @Override
     public boolean canRegister() {
-        /*pingFormatter = new PingFormatter(
-            getInt("ping_value.medium", 50),
-            getInt("ping_value.high", 100),
-            getString("ping_color.low", "&a"),
-            getString("ping_color.medium", "&e"),
-            getString("ping_color.high", "&c")
-        );*/
         pingFormatter = new PingFormatter(getConfigSection("ping.formatting"));
         directionNames = Optional.ofNullable(getConfigSection("direction"))
             .map(section -> section.getValues(false))
@@ -457,10 +451,31 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
         // has_potioneffect_<effect>
         if (params.startsWith("has_potioneffect_")) {
             final String effectName = params.substring("has_potioneffect_".length());
-            return Optional.ofNullable(PotionEffectType.getByName(effectName))
-                .map(player::hasPotionEffect)
+            final Optional<PotionEffectType> effectType = Optional.ofNullable(PotionEffectType.getByName(effectName));
+
+            if (effectType.isEmpty()) {
+                return "Unknown potion effect " + effectName;
+            }
+
+            return effectType.map(player::hasPotionEffect)
                 .map(this::bool)
-                .orElse("Unknown potion effect " + effectName);
+                .get();
+        }
+
+        // potion_effect_level_<effect>
+        if (params.startsWith("potion_effect_level_")) {
+            final String effectName = params.substring("potion_effect_level_".length());
+            final Optional<PotionEffectType> effectType = Optional.ofNullable(PotionEffectType.getByName(effectName));
+
+            if (effectType.isEmpty()) {
+                return "Unknown potion effect " + effectName;
+            }
+
+            return effectType.filter(player::hasPotionEffect)
+                .map(player::getPotionEffect)
+                .map(PotionEffect::getAmplifier)
+                .map(String::valueOf)
+                .orElse("0");
         }
 
         // item_in_hand_level_<enchantment name or key>
