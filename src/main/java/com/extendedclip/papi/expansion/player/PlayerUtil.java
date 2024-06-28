@@ -125,12 +125,16 @@ public final class PlayerUtil {
 
             final Object entityPlayer = getHandle.invoke(player);
 
-            if (VersionHelper.IS_1_20_4_OR_NEWER) {
-              locale = entityPlayer.getClass().getField("cO");
+            if (VersionHelper.IS_MOJMAP) {
+                locale = entityPlayer.getClass().getField("language");
+            } else if (VersionHelper.IS_1_20_6_OR_NEWER) {
+                locale = entityPlayer.getClass().getField("dd");
+            } else if (VersionHelper.IS_1_20_4_OR_NEWER) {
+                locale = entityPlayer.getClass().getField("cO");
             } else if (VersionHelper.IS_1_20_2_OR_NEWER) {
-              locale = entityPlayer.getClass().getField("cM");
+                locale = entityPlayer.getClass().getField("cM");
             } else {
-              locale = entityPlayer.getClass().getField("locale");
+                locale = entityPlayer.getClass().getField("locale");
             }
         }
     };
