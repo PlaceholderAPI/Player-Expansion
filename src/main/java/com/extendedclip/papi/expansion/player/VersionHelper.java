@@ -35,6 +35,16 @@ public final class VersionHelper {
      */
     public static final boolean IS_1_20_4_OR_NEWER = VERSION >= 1_20_4;
 
+    /**
+     * @see Player#getLocale()
+     */
+    public static final boolean IS_1_20_6_OR_NEWER = VERSION >= 1_20_6;
+
+    /**
+     * @see Player#getLocale()
+     */
+    public static final boolean IS_MOJMAP = IS_1_20_6_OR_NEWER && doesClassExist("org.bukkit.craftbukkit.CraftServer");
+
     private VersionHelper() { }
 
     /**
@@ -63,6 +73,21 @@ public final class VersionHelper {
         }
 
         return version;
+    }
+
+    /**
+     * Detect specific class exists
+     *
+     * @param className
+     * @return true if the class exists, otherwise false
+     */
+    private static boolean doesClassExist(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
 }
