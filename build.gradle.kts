@@ -7,6 +7,7 @@ group = "at.helpch.placeholderapi.expansion"
 version = "2.1.0"
 
 repositories {
+    mavenCentral()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
