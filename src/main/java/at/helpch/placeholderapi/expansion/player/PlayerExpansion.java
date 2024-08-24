@@ -420,6 +420,8 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return bool(player.isDead());
             case "is_flying":
                 return bool(player.isFlying());
+            case "is_gliding":
+                return bool(player.isGliding());
             case "is_inside_vehicle":
                 return bool(player.isInsideVehicle());
             case "is_leashed":
