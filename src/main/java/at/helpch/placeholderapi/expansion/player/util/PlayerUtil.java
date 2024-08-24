@@ -11,9 +11,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,9 +26,6 @@ public final class PlayerUtil {
         BlockFace.WEST, BlockFace.NORTH_WEST
     };
 
-    private static final PlayerPingHandler pingHandler = new PlayerPingHandler();
-    private static final PlayerLocaleHandler localeHandler = new PlayerLocaleHandler();
-
     /**
      * Get player's item in hand using the right method depending on the server version
      *
@@ -45,26 +39,31 @@ public final class PlayerUtil {
         return VersionHelper.HAS_OFF_HAND ? player.getInventory().getItemInMainHand() : player.getItemInHand();
     }
 
-    public static @NotNull String getBedCoordinate(
-        @NotNull final OfflinePlayer player, @NotNull final Function<@NotNull Location, @NotNull Number> coordinateMapper
+    public static @NotNull String getLocationInfo(
+        @Nullable final Location location, @NotNull final String defaultValue,
+        @NotNull final Function<@NotNull Location, @NotNull Object> coordinateMapper
     ) {
-        return Optional.ofNullable(player.getBedSpawnLocation())
+        return Optional.ofNullable(location)
             .map(coordinateMapper)
             .map(String::valueOf)
-            .orElse("0");
+            .orElse(defaultValue);
     }
 
-    @SuppressWarnings("OptionalOfNullableMisuse")
-    public static @NotNull String getCompassCoordinate(
-        @NotNull final Player player, @NotNull final Function<@NotNull Location, @NotNull Number> coordinateMapper
+    public static @NotNull String getBedLocationInfo(
+        @NotNull final OfflinePlayer player, @NotNull final String defaultValue,
+        @NotNull final Function<@NotNull Location, @NotNull Object> coordinateMapper
     ) {
-        return Optional.ofNullable(player.getCompassTarget())
-            .map(coordinateMapper)
-            .map(String::valueOf)
-            .orElse("0");
+        return getLocationInfo(player.getBedSpawnLocation(), defaultValue, coordinateMapper);
     }
 
-    public static int getEmptySlots(@NotNull final Player player) {
+    public static @NotNull String getCompassLocationInfo(
+        @NotNull final Player player, @NotNull final String defaultValue,
+        @NotNull final Function<@NotNull Location, @NotNull Object> coordinateMapper
+    ) {
+        return getLocationInfo(player.getCompassTarget(), defaultValue, coordinateMapper);
+    }
+
+    public static int getEmptySlotsCount(@NotNull final Player player) {
         final PlayerInventory inventory = player.getInventory();
         final List<ItemStack> items = new ArrayList<>(Arrays.asList(inventory.getContents()));
         items.add(inventory.getHelmet());
@@ -103,14 +102,6 @@ public final class PlayerUtil {
         }
     }
 
-    public static @NotNull String getLocale(@NotNull final Player player) {
-        return localeHandler.apply(player);
-    }
-
-    public static @NotNull Integer getPing(@NotNull final Player player) {
-        return pingHandler.apply(player);
-    }
-
     public static double getMaxHealth(@NotNull final Player player) {
         if (VersionHelper.HAS_ATTRIBUTE_API) {
             return Optional.ofNullable(player.getAttribute(Attribute.GENERIC_MAX_HEALTH))
@@ -143,88 +134,6 @@ public final class PlayerUtil {
             experience = 0;
         }
         return experience;
-    }
-
-    private static class PlayerPingHandler implements Function<@NotNull Player, @NotNull Integer> {
-
-        private Field ping;
-        private Method getHandle;
-
-        private void cacheReflection(@NotNull final Player player) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-            getHandle = player.getClass().getDeclaredMethod("getHandle");
-            getHandle.setAccessible(true);
-
-            ping = getHandle.invoke(player).getClass().getDeclaredField("ping");
-            ping.setAccessible(true);
-        }
-
-        @Override
-        public Integer apply(@NotNull final Player player) {
-            if (VersionHelper.HAS_PLAYER_PING_METHOD) {
-                return player.getPing();
-            }
-
-            if (ping == null) {
-                try {
-                    cacheReflection(player);
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException |
-                         NoSuchFieldException e) {
-                    Logging.error(e, "Could not cache reflection for {0} (player: {1})", getClass().getSimpleName(), player.getName());
-                }
-            }
-
-            if (ping != null) {
-                try {
-                    return ping.getInt(getHandle.invoke(player));
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    Logging.error(e, "Could not get the ping of {0}, fallback to -1", player.getName());
-                }
-            }
-
-            return -1;
-        }
-
-    }
-
-    private static class PlayerLocaleHandler implements Function<@NotNull Player, @NotNull String> {
-
-        private Field locale;
-        private Method getHandle;
-
-        private void cacheReflection(@NotNull final Player player) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-            getHandle = player.getClass().getDeclaredMethod("getHandle");
-            getHandle.setAccessible(true);
-
-            locale = getHandle.invoke(player).getClass().getDeclaredField("locale");
-        }
-
-        @Override
-        public @NotNull String apply(@NotNull final Player player) {
-            if (VersionHelper.HAS_PLAYER_LOCALE_METHOD) {
-                //noinspection deprecation
-                return player.getLocale();
-            }
-
-            if (locale == null) {
-                try {
-                    cacheReflection(player);
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException |
-                         NoSuchFieldException e) {
-                    Logging.error(e, "Could not cache reflection for {0} (player: {1})", getClass().getSimpleName(), player.getName());
-                }
-            }
-
-            if (locale != null) {
-                try {
-                    return (String) locale.get(getHandle.invoke(player));
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    Logging.error(e, "Could not get the locale of {0}, fallback to en_US", player.getName());
-                }
-            }
-
-            return "en_US";
-        }
-
     }
 
 }

@@ -1,5 +1,6 @@
 package at.helpch.placeholderapi.expansion.player.ping;
 
+import at.helpch.placeholderapi.expansion.player.handler.PlayerPingHandler;
 import at.helpch.placeholderapi.expansion.player.util.Logging;
 import at.helpch.placeholderapi.expansion.player.util.PlayerUtil;
 import com.google.common.primitives.Ints;
@@ -14,34 +15,20 @@ import java.util.List;
 
 public final class PingFormatter {
 
-    /*private final int mediumValue;
-    private final int highValue;
-
-    private final String lowColor;
-    private final String mediumColor;
-    private final String highColor;*/
-
     private final List<PingFormattingRule> pingFormattingRules = new ArrayList<>();
 
-    /*public PingFormatter(
-        final int mediumValue, final int highValue, @NotNull final String lowColor,
-        @NotNull final String mediumColor, @NotNull final String highColor
-    ) {
-        this.mediumValue = mediumValue;
-        this.highValue = highValue;
-        this.lowColor = lowColor;
-        this.mediumColor = mediumColor;
-        this.highColor = highColor;
-    }*/
-
-    public PingFormatter(@Nullable final ConfigurationSection configurationSection) {
-        if (configurationSection == null) {
+    public PingFormatter(@Nullable final ConfigurationSection config) {
+        if (config == null) {
             Logging.warn("Could not find the 'ping.formatting' section in config");
             return;
         }
 
-        for (final String key : configurationSection.getKeys(false)) {
-            final String formatting = configurationSection.getString(key);
+        load(config);
+    }
+
+    private void load(@NotNull ConfigurationSection config) {
+        for (final String key : config.getKeys(false)) {
+            final String formatting = config.getString(key);
 
             if (formatting == null) {
                 continue;
@@ -71,20 +58,8 @@ public final class PingFormatter {
         }
     }
 
-    /*private @NotNull String getColor(final int ping) {
-        if (ping < mediumValue) {
-            return lowColor;
-        }
-
-        if (ping < highValue) {
-            return mediumColor;
-        }
-
-        return highColor;
-    }*/
-
     public @NotNull String getPing(@NotNull final Player player, final boolean colored) {
-        final int ping = PlayerUtil.getPing(player);
+        final int ping = PlayerPingHandler.INSTANCE.apply(player);
 
         if (ping < 0 || !colored) {
             return String.valueOf(ping);

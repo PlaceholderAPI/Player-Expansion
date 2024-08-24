@@ -1,7 +1,8 @@
 package at.helpch.placeholderapi.expansion.player;
 
-import at.helpch.placeholderapi.expansion.player.util.ItemUtil;
+import at.helpch.placeholderapi.expansion.player.handler.PlayerLocaleHandler;
 import at.helpch.placeholderapi.expansion.player.ping.PingFormatter;
+import at.helpch.placeholderapi.expansion.player.util.ItemUtil;
 import at.helpch.placeholderapi.expansion.player.util.PlayerUtil;
 import at.helpch.placeholderapi.expansion.player.util.TimeUtil;
 import at.helpch.placeholderapi.expansion.player.util.VersionHelper;
@@ -143,17 +144,16 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return PlaceholderAPIPlugin.getDateFormat().format(new Date(offlinePlayer.getLastPlayed()));
 
             //<editor-fold desc="Bed location placeholders">
+            case "bed_is_set":
+                return bool(offlinePlayer.getBedSpawnLocation() != null);
             case "bed_x":
-                return PlayerUtil.getBedCoordinate(offlinePlayer, Location::getX);
+                return PlayerUtil.getBedLocationInfo(offlinePlayer, "0", Location::getBlockX);
             case "bed_y":
-                return PlayerUtil.getBedCoordinate(offlinePlayer, Location::getY);
+                return PlayerUtil.getBedLocationInfo(offlinePlayer, "0", Location::getBlockY);
             case "bed_z":
-                return PlayerUtil.getBedCoordinate(offlinePlayer, Location::getZ);
+                return PlayerUtil.getBedLocationInfo(offlinePlayer, "0", Location::getBlockZ);
             case "bed_world":
-                return Optional.ofNullable(offlinePlayer.getBedSpawnLocation())
-                    .map(Location::getWorld)
-                    .map(World::getName)
-                    .orElse("");
+                return PlayerUtil.getBedLocationInfo(offlinePlayer, "N/A", location -> location.getWorld().getName());
             //</editor-fold>
 
             //<editor-fold desc="Various boolean placeholders">
@@ -342,17 +342,13 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             }
 
             case "compass_x":
-                return PlayerUtil.getCompassCoordinate(player, Location::getBlockX);
+                return PlayerUtil.getCompassLocationInfo(player, "0", Location::getBlockX);
             case "compass_y":
-                return PlayerUtil.getCompassCoordinate(player, Location::getBlockY);
+                return PlayerUtil.getCompassLocationInfo(player, "0", Location::getBlockY);
             case "compass_z":
-                return PlayerUtil.getCompassCoordinate(player, Location::getBlockZ);
+                return PlayerUtil.getCompassLocationInfo(player, "0", Location::getBlockZ);
             case "compass_world":
-                //noinspection OptionalOfNullableMisuse
-                return Optional.ofNullable(player.getCompassTarget())
-                    .map(Location::getWorld)
-                    .map(World::getName)
-                    .orElse("");
+                return PlayerUtil.getCompassLocationInfo(player, Bukkit.getWorlds().get(0).getName(), location -> location.getWorld().getName());
             //</editor-fold>
 
             //<editor-fold desc="Experience placeholders">
@@ -372,7 +368,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "has_empty_slot":
                 return bool(player.getInventory().firstEmpty() > -1);
             case "empty_slots":
-                return String.valueOf(PlayerUtil.getEmptySlots(player));
+                return String.valueOf(PlayerUtil.getEmptySlotsCount(player));
 
             case "item_in_hand":
             case "item_in_hand_name":
@@ -454,7 +450,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             final String effectName = params.substring("has_potioneffect_".length());
             final Optional<PotionEffectType> effectType = Optional.ofNullable(PotionEffectType.getByName(effectName));
 
-            if (effectType.isEmpty()) {
+            if (!effectType.isPresent()) {
                 return "Unknown potion effect " + effectName;
             }
 
@@ -468,7 +464,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             final String effectName = params.substring("potion_effect_level_".length());
             final Optional<PotionEffectType> effectType = Optional.ofNullable(PotionEffectType.getByName(effectName));
 
-            if (effectType.isEmpty()) {
+            if (!effectType.isPresent()) {
                 return "Unknown potion effect " + effectName;
             }
 
@@ -491,7 +487,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
         // locale or locale_<option>
         if (params.startsWith("locale")) {
-            final String localeString = PlayerUtil.getLocale(player);
+            final String localeString = PlayerLocaleHandler.INSTANCE.apply(player);
             final Locale locale = Locale.forLanguageTag(localeString.replace('_', '-'));
 
             switch (params) {
