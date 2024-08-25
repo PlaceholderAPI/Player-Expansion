@@ -98,7 +98,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
             case "_name":
                 return ItemUtil.getName(item);
             case "_data":
-                return String.valueOf(ItemUtil.getData(item));
+                return String.valueOf(ItemUtil.getDamage(item));
             case "_durability":
                 return String.valueOf(ItemUtil.getDurability(item));
             default:
@@ -114,7 +114,7 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
 
         if (targetedPing || targetedColoredPing) {
             final String targetName = params.substring((targetedPing ? "ping_" : "colored_ping_").length());
-            return Optional.ofNullable(Bukkit.getPlayer(targetName))
+            return Optional.ofNullable(Bukkit.getPlayerExact(targetName))
                 .map(target -> pingFormatter.getPing(target, targetedColoredPing))
                 .orElse("0");
         }
@@ -274,8 +274,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                     return "The End";
                 } else if (environment == World.Environment.NORMAL) {
                     return "Overworld";
+                } else if (environment.name().equals("CUSTOM")) {
+                    return "Custom";
                 } else {
-                    return "";
+                    return environment.name();
                 }
             }
             case "world_time":

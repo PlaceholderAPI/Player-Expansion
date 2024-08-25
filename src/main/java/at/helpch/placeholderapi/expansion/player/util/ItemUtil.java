@@ -21,7 +21,7 @@ public final class ItemUtil {
      * @return whether the item is null or air
      */
     public static boolean isNullOrAir(@Nullable final ItemStack itemStack) {
-        return itemStack == null || itemStack.getType().name().contains("_AIR");
+        return itemStack == null || itemStack.getType().name().equals("AIR") || itemStack.getType().name().contains("_AIR");
     }
 
     /**
@@ -45,16 +45,17 @@ public final class ItemUtil {
             return "";
         }
 
-        //noinspection deprecation
+        //noinspection DataFlowIssue
         return item.hasItemMeta() ? item.getItemMeta().getDisplayName() : "";
     }
 
-    public static int getData(@Nullable final ItemStack item) {
+    public static int getDamage(@Nullable final ItemStack item) {
         if (isNullOrAir(item)) {
             return 0;
         }
 
         if (VersionHelper.HAS_DAMAGEABLE_ITEM_META) {
+            //noinspection DataFlowIssue
             return item.hasItemMeta() ? ((Damageable) item.getItemMeta()).getDamage() : 0;
         } else {
             //noinspection deprecation
@@ -69,7 +70,7 @@ public final class ItemUtil {
      * @return durability left or 0 if the item {@link #isNullOrAir(ItemStack) is null or air}
      */
     public static int getDurability(@Nullable final ItemStack item) {
-        return isNullOrAir(item) ? 0 : item.getType().getMaxDurability() - getData(item);
+        return isNullOrAir(item) ? 0 : item.getType().getMaxDurability() - getDamage(item);
     }
 
     public static @Nullable Enchantment getEnchantmentFromString(@NotNull final String string) {
