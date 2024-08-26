@@ -23,6 +23,13 @@ java {
 }
 
 tasks {
+    jar {
+        manifest {
+            attributes["Implementation-Title"] = "player"
+            attributes["Implementation-Version"] = project.version
+        }
+    }
+
     shadowJar {
         archiveFileName.set("PAPI-Expansion-Player-${project.version}.jar")
     }
