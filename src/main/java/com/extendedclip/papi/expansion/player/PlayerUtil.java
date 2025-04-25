@@ -1,6 +1,5 @@
 package com.extendedclip.papi.expansion.player;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -8,6 +7,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -199,7 +199,23 @@ public final class PlayerUtil {
     }
 
     public static int durability(ItemStack item) {
-        return item != null ? item.getType().getMaxDurability() - item.getDurability() : 0;
+        if (item == null) {
+            return 0;
+        }
+
+        if (!VersionHelper.IS_1_21_OR_NEWER) {
+            return item.getType().getMaxDurability() - item.getDurability();
+        }
+
+        final Damageable meta = (Damageable) item.getItemMeta();
+        if (meta == null) {
+            return 0;
+        }
+
+        if (meta.hasMaxDamage()) {
+            return meta.getMaxDamage() - meta.getDamage();
+        }
+        return item.getType().getMaxDurability() - meta.getDamage();
     }
 
     public static int getEmptySlots(Player p) {

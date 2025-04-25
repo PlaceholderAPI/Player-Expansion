@@ -35,6 +35,11 @@ public final class VersionHelper {
      */
     public static final boolean IS_1_20_4_OR_NEWER = VERSION >= 1_20_4;
 
+    /**
+     * @see org.bukkit.inventory.meta.Damageable#getMaxDamage()
+     */
+    public static final boolean IS_1_21_OR_NEWER = VERSION >= 1_21_0;
+
     private VersionHelper() { }
 
     /**
