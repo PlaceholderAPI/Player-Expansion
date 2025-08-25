@@ -336,6 +336,10 @@ public final class PlayerExpansion extends PlaceholderExpansion implements Confi
                 return String.valueOf(p.getHealth());
             case "health_rounded":
                 return String.valueOf(Math.round(p.getHealth()));
+            case "health_absorption":
+                return String.valueOf(p.getHealth() + (VersionHelper.HAS_ABSORPTION_METHODS ? p.getAbsorptionAmount() : 0));
+            case "health_absorption_rounded":
+                return String.valueOf(Math.round(p.getHealth() + (VersionHelper.HAS_ABSORPTION_METHODS ? p.getAbsorptionAmount() : 0)));
             case "health_scale":
                 return String.valueOf(p.getHealthScale());
             case "has_health_boost":
