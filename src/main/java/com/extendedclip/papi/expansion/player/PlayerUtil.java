@@ -243,6 +243,10 @@ public final class PlayerUtil {
     }
 
     public static String getBiome(Player p) {
+        if (VersionHelper.IS_1_21_3_OR_NEWER) {
+            return p.getLocation().getBlock().getBiome().name();
+        }
+
         return String.valueOf(p.getLocation().getBlock().getBiome());
     }
 

@@ -34,8 +34,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.durability;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format12;
 import static com.extendedclip.papi.expansion.player.PlayerUtil.format24;

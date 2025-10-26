@@ -35,6 +35,8 @@ public final class VersionHelper {
      */
     public static final boolean IS_1_20_4_OR_NEWER = VERSION >= 1_20_4;
 
+    public static final boolean IS_1_21_3_OR_NEWER = VERSION >= 1_21_3;
+
     private VersionHelper() { }
 
     /**
