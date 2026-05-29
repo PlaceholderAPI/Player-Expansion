@@ -23,7 +23,7 @@ public final class PlayerExpansion extends PlaceholderExpansion {
   }
 
   public String getVersion() {
-    return "1.0.5";
+    return "1.0.6";
   }
 
   public String onPlaceholderRequest(PlayerRef player, String identifier) {
@@ -40,15 +40,15 @@ public final class PlayerExpansion extends PlaceholderExpansion {
       case "world_uuid":
         return player.getWorldUuid().toString();
       case "x":
-        return String.valueOf(player.getTransform().getPosition().getX());
+        return String.valueOf(player.getTransform().getPosition().x);
       case "y":
-        return String.valueOf(player.getTransform().getPosition().getY());
+        return String.valueOf(player.getTransform().getPosition().y);
       case "z":
-        return String.valueOf(player.getTransform().getPosition().getZ());
+        return String.valueOf(player.getTransform().getPosition().z);
       case "yaw":
-        return String.valueOf(player.getHeadRotation().getYaw());
+        return String.valueOf(player.getHeadRotation().yaw());
       case "pitch":
-        return String.valueOf(player.getHeadRotation().getPitch());
+        return String.valueOf(player.getHeadRotation().pitch());
     }
 
     Ref<EntityStore> ref = player.getReference();
@@ -66,8 +66,6 @@ public final class PlayerExpansion extends PlaceholderExpansion {
     switch (identifier) {
       case "has_played_before":
         return bool(!p.isFirstSpawn());
-      case "name":
-        return p.getDisplayName();
       case "gamemode":
         return p.getGameMode().name();
       case "world":
@@ -146,7 +144,7 @@ public final class PlayerExpansion extends PlaceholderExpansion {
     if (identifier.startsWith("has_permission_")) {
       if ((identifier.split("has_permission_")).length > 1) {
         String perm = identifier.split("has_permission_")[1];
-        return bool(p.hasPermission(perm));
+        return bool(player.hasPermission(perm));
       }
       return bool(false);
     }
